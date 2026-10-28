@@ -1,0 +1,8 @@
+# Dependencies
+node_modules/
+
+# Agent & temporary files
+.agents/
+.DS_Store
+Thumbs.db
+*.log

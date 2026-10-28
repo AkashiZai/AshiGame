@@ -1,0 +1,1390 @@
+/* ==========================================================================
+   TABLETOP TCG - AUTHENTIC PHYSICAL CARD GAME DESIGN SYSTEM
+   Inspired by: Hearthstone, Magic: The Gathering, Physical TCG Tabletop
+   Zero AI-Slop: No generic emoji soup, no bootstrap dashboard look.
+   Authentic Felt Playmat, Fanned Hand Physics, TCG Card Anatomy with
+   Mana Gems, Attack/Defense Crests, and Physical Battle Stage.
+   ========================================================================== */
+
+:root {
+  /* Tabletop Materials */
+  --table-wood-dark: #120a06;
+  --table-wood-mid: #25160d;
+  --table-wood-light: #3d2516;
+  --table-felt: #0d2818;
+  --table-felt-inner: #163824;
+  --table-felt-border: #4d3a24;
+  
+  /* TCG Gold & Metallics */
+  --gold-highlight: #ffea79;
+  --gold-primary: #d4a017;
+  --gold-dark: #8c6209;
+  --silver-primary: #cbd5e1;
+  --bronze-primary: #a77044;
+  
+  /* Stats & Gems */
+  --mana-blue: #0284c7;
+  --mana-blue-glow: rgba(56, 189, 248, 0.6);
+  --health-red: #b91c1c;
+  --health-red-glow: rgba(239, 68, 68, 0.6);
+  --shield-steel: #334155;
+  --shield-cyan: #0ea5e9;
+  --attack-crimson: #dc2626;
+  --defense-green: #15803d;
+  
+  /* Typography & Parchment */
+  --parchment-bg: #f5eedc;
+  --parchment-border: #d4c5a9;
+  --parchment-text: #2c2214;
+  --parchment-dim: #6b5c46;
+  
+  /* Layout */
+  --font-family: 'Kanit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --card-width: 172px;
+  --card-height: 258px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--table-wood-dark);
+  background-image: 
+    radial-gradient(ellipse at 50% 50%, rgba(22, 56, 36, 0.4) 0%, transparent 80%),
+    linear-gradient(180deg, #180d08 0%, #0d0704 100%);
+  color: #f1f5f9;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+/* ==========================================================================
+   TOP TAVERN HEADER
+   ========================================================================== */
+header {
+  background: linear-gradient(180deg, #24140b 0%, #150b06 100%);
+  border-bottom: 3px solid var(--gold-dark);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+}
+
+.tcg-emblem {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, var(--gold-highlight), var(--gold-dark));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba(212, 160, 23, 0.5);
+}
+
+.tcg-emblem svg {
+  width: 22px;
+  height: 22px;
+  fill: #1a0f07;
+}
+
+.logo-text h1 {
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: var(--gold-highlight);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(212, 160, 23, 0.4);
+}
+
+.logo-text span {
+  font-size: 11.5px;
+  color: #c7b89d;
+  font-weight: 500;
+  display: block;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 6px;
+  background: #100804;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid #4a341d;
+}
+
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: #b5a489;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+  color: var(--gold-highlight);
+  background: rgba(255, 234, 121, 0.08);
+}
+
+.nav-btn.active {
+  background: linear-gradient(180deg, #8c6209 0%, #523803 100%);
+  color: #fff;
+  border: 1px solid var(--gold-highlight);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   MAIN TABLETOP CONTAINER
+   ========================================================================== */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 20px;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.tab-content {
+  display: none;
+  flex: 1;
+}
+
+.tab-content.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   AUTHENTIC FELT PLAYMAT & ARENA
+   ========================================================================== */
+.tabletop-board {
+  flex: 1;
+  background: var(--table-felt);
+  background-image: 
+    radial-gradient(circle at 50% 50%, var(--table-felt-inner) 0%, var(--table-felt) 85%);
+  border: 8px solid var(--table-wood-mid);
+  border-radius: 24px;
+  box-shadow: 
+    inset 0 0 40px rgba(0, 0, 0, 0.8),
+    0 12px 36px rgba(0, 0, 0, 0.85),
+    0 0 0 2px var(--gold-dark);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  padding: 16px 24px;
+  gap: 12px;
+}
+
+/* Table Felt Stitched Border */
+.tabletop-board::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1.5px dashed rgba(212, 160, 23, 0.35);
+  border-radius: 16px;
+  pointer-events: none;
+}
+
+/* Top Hero Bar (Opponent) */
+.hero-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Hearthstone-Style Framed Hero Portrait */
+.hero-frame-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hero-portrait-socket {
+  position: relative;
+  width: 78px;
+  height: 78px;
+}
+
+.hero-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #1c1511;
+  border: 3.5px solid var(--gold-primary);
+  box-shadow: 
+    0 0 0 2px #3d2516,
+    0 6px 16px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-avatar-icon {
+  font-size: 36px;
+}
+
+.hero-frame-wrap.active-turn .hero-avatar {
+  border-color: var(--gold-highlight);
+  box-shadow: 0 0 22px rgba(255, 234, 121, 0.7), 0 6px 16px rgba(0, 0, 0, 0.8);
+  animation: heroGlowPulse 2s infinite ease-in-out;
+}
+
+@keyframes heroGlowPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(255, 234, 121, 0.4); }
+  50% { box-shadow: 0 0 24px rgba(255, 234, 121, 0.8); }
+}
+
+/* Hearthstone Ruby Health Orb (Bottom-Right of portrait) */
+.health-orb {
+  position: absolute;
+  bottom: -4px;
+  right: -6px;
+  width: 34px;
+  height: 34px;
+  background: radial-gradient(circle at 35% 35%, #ff4d4d, var(--health-red) 65%, #4a0505);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 900;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 8px var(--health-red-glow);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  z-index: 5;
+}
+
+/* Hearthstone Steel Armor Crest (Top-Right of portrait) */
+.armor-crest {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 5px;
+  background: radial-gradient(circle at 35% 35%, #94a3b8, var(--shield-steel) 70%, #0f172a);
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 900;
+  color: #67e8f9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  z-index: 5;
+  transition: transform 0.2s ease;
+}
+
+.armor-crest.hidden {
+  display: none;
+}
+
+.hero-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-title-name {
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.hero-sub-status {
+  font-size: 12px;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Hero Mana Tray (Physical Sapphire Crystals) */
+.mana-tray {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(10, 16, 26, 0.85);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #2e4368;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.mana-counter-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mana-crystals-row {
+  display: flex;
+  gap: 5px;
+}
+
+.mana-gem {
+  width: 15px;
+  height: 18px;
+  background: #172554;
+  border: 1.5px solid #334155;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  transition: all 0.25s ease;
+}
+
+.mana-gem.filled {
+  background: linear-gradient(180deg, #7dd3fc 0%, var(--mana-blue) 60%, #0369a1 100%);
+  border-color: #e0f2fe;
+  box-shadow: 0 0 10px var(--mana-blue-glow);
+  transform: scale(1.1);
+}
+
+/* ==========================================================================
+   CENTER BATTLE MAT (THE CLASH STAGE & CARD SLOTS)
+   ========================================================================== */
+.center-battleground {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 140px 1fr 140px;
+  gap: 16px;
+  align-items: center;
+  min-height: 240px;
+  position: relative;
+}
+
+/* Left: Graveyard / Discard Slot */
+.tabletop-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.slot-card-holder {
+  width: 100px;
+  height: 145px;
+  border: 2px dashed rgba(212, 160, 23, 0.4);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.slot-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #d4a017;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 3D Physical Deck Stack on Right */
+.deck-stack-3d {
+  width: 96px;
+  height: 140px;
+  background: linear-gradient(135deg, #2a1b12, #180f0a);
+  border-radius: 8px;
+  border: 2px solid var(--gold-dark);
+  box-shadow: 
+    2px 2px 0 #180f0a,
+    4px 4px 0 #120b07,
+    6px 6px 0 #0d0805,
+    8px 8px 16px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.deck-stack-3d:hover {
+  transform: translateY(-3px);
+}
+
+.deck-inner-seal {
+  border: 1px dashed rgba(255, 234, 121, 0.4);
+  width: 82%;
+  height: 86%;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-primary);
+}
+
+.deck-count-num {
+  font-size: 16px;
+  font-weight: 900;
+  color: #fff;
+  margin-top: 4px;
+}
+
+/* Center Duel Clash Stage */
+.duel-clash-stage {
+  height: 100%;
+  background: rgba(10, 25, 16, 0.45);
+  border: 2px solid rgba(212, 160, 23, 0.3);
+  border-radius: 16px;
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 12px;
+}
+
+/* Battle Action Live Zone */
+.stage-combat-live {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+}
+
+/* Live Played Card on Duel Clash Stage */
+.live-played-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(18, 10, 6, 0.94);
+  border: 2px solid var(--gold-highlight);
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 20px rgba(212, 160, 23, 0.4);
+  z-index: 50;
+  pointer-events: none;
+  animation: clashPopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.live-played-card.fade-out {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.85);
+}
+
+@keyframes clashPopIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.clash-badge {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  padding: 3px 12px;
+  border-radius: 20px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  letter-spacing: 0.5px;
+}
+
+.clash-card-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.clash-card-frame img {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid var(--gold-primary);
+}
+
+.clash-card-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gold-highlight);
+}
+
+.clash-skill-desc {
+  font-size: 11.5px;
+  color: #f1f5f9;
+  text-align: center;
+  max-width: 240px;
+  line-height: 1.35;
+  background: rgba(0,0,0,0.5);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.battle-ticker-msg {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f8fafc;
+  background: rgba(15, 10, 7, 0.75);
+  border: 1px solid rgba(212, 160, 23, 0.5);
+  padding: 8px 20px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Combat Stage Turn End Button */
+.turn-crown-btn {
+  background: linear-gradient(180deg, #d4a017 0%, #8c6209 100%);
+  border: 2px solid var(--gold-highlight);
+  color: #1a0f07;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  padding: 10px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.turn-crown-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  background: linear-gradient(180deg, #ffea79 0%, #d4a017 100%);
+  box-shadow: 0 8px 24px rgba(212, 160, 23, 0.4), inset 0 1px 1px #fff;
+}
+
+.turn-crown-btn:active {
+  transform: scale(0.96);
+}
+
+.turn-crown-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  filter: grayscale(0.8);
+}
+
+/* ==========================================================================
+   AUTHENTIC TCG CARD ANATOMY
+   ========================================================================== */
+.card-item {
+  width: var(--card-width);
+  height: var(--card-height);
+  background: #171c26;
+  border-radius: 12px;
+  border: 3px solid #785324;
+  display: flex;
+  flex-direction: column;
+  padding: 7px;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.7),
+    inset 0 0 0 1.5px rgba(255, 234, 121, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: visible;
+  background-image: linear-gradient(180deg, #2b1d14 0%, #15100c 100%);
+}
+
+/* TCG Mana Gemstone (Top-Left) */
+.card-mana-gem {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 34px;
+  height: 40px;
+  background: linear-gradient(180deg, #38bdf8 0%, var(--mana-blue) 60%, #0369a1 100%);
+  border: 2px solid #e0f2fe;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8), 0 0 12px var(--mana-blue-glow);
+  z-index: 10;
+}
+
+/* TCG Category Plaque (Top-Right) */
+.card-class-seal {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(18, 11, 7, 0.9);
+  border: 1px solid var(--gold-dark);
+  color: var(--gold-highlight);
+  letter-spacing: 0.3px;
+  z-index: 5;
+}
+
+/* Arched Portrait Window */
+.card-art-frame {
+  width: 100%;
+  height: 110px;
+  border-radius: 8px 8px 4px 4px;
+  overflow: hidden;
+  background: #000;
+  border: 2px solid #6b4c24;
+  margin-top: 14px;
+  position: relative;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.card-art-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card-item:hover .card-art-frame img {
+  transform: scale(1.07);
+}
+
+/* Title Banner Ribbon */
+.card-banner-ribbon {
+  background: linear-gradient(180deg, #422919 0%, #29180c 100%);
+  border: 1.5px solid var(--gold-dark);
+  border-radius: 4px;
+  padding: 3px 6px;
+  margin-top: 4px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.card-title-text {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--gold-highlight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px #000;
+}
+
+/* Parchment Rules Box */
+.card-rules-parchment {
+  background: var(--parchment-bg);
+  border: 1.5px solid var(--parchment-border);
+  border-radius: 6px;
+  padding: 5px 6px;
+  margin-top: 4px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: var(--parchment-text);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.skill-headline {
+  font-size: 10px;
+  font-weight: 800;
+  color: #881337;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 1.2;
+}
+
+.skill-description {
+  font-size: 9.5px;
+  line-height: 1.25;
+  color: #332717;
+  margin-top: 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Attack Crest (Bottom-Left) */
+.stat-crest {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 900;
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 2px #000;
+  z-index: 10;
+}
+
+.stat-crest.attack-crest {
+  bottom: -6px;
+  left: -6px;
+  background: radial-gradient(circle at 35% 35%, #ef4444, var(--attack-crimson) 70%, #450a0a);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+/* Defense Crest (Bottom-Right) */
+.stat-crest.defense-crest {
+  bottom: -6px;
+  right: -6px;
+  background: radial-gradient(circle at 35% 35%, #22c55e, var(--defense-green) 70%, #052e16);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 0 8px rgba(34, 197, 94, 0.5);
+}
+
+/* ==========================================================================
+   HAND FANNING PHYSICS (REAL HAND OF CARDS)
+   ========================================================================== */
+.fanned-hand-zone {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 220px;
+  position: relative;
+  margin-top: 10px;
+  padding-bottom: 8px;
+}
+
+.fanned-hand-zone .card-item {
+  position: absolute;
+  bottom: 8px;
+  transform-origin: center bottom;
+  transform: translateX(var(--card-tx, 0px)) translateY(var(--card-ty, 0px)) rotate(var(--card-rot, 0deg));
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease;
+}
+
+/* Hitbox bridge so the mouse cursor never loses contact when the card lifts up */
+.fanned-hand-zone .card-item::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 -50px 0;
+  pointer-events: auto;
+  z-index: -1;
+}
+
+/* Dynamic Hover Elevation: stays in its own column, lifts up smoothly without twitching */
+.fanned-hand-zone .card-item:hover {
+  transform: translateX(var(--card-tx, 0px)) translateY(-38px) rotate(0deg) scale(1.08) !important;
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.88), 0 0 22px rgba(255, 234, 121, 0.5);
+  z-index: 100 !important;
+  border-color: var(--gold-highlight);
+}
+
+/* Enemy Hand (Top: Upside-down card backs) */
+.enemy-hand-strip {
+  display: flex;
+  justify-content: center;
+  gap: -20px;
+  height: 80px;
+}
+
+.enemy-card-back {
+  width: 60px;
+  height: 85px;
+  background: linear-gradient(135deg, #2a1b12, #180f0a);
+  border: 1.5px solid var(--gold-dark);
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 -8px;
+}
+
+.enemy-card-back svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--gold-primary);
+  opacity: 0.6;
+}
+
+/* ==========================================================================
+   PHYSICAL BATTLE CLASH ANIMATIONS
+   ========================================================================== */
+@keyframes cardStrikeOpponent {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(20px) scale(1.05); }
+  60% { transform: translateY(-120px) scale(1.2); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.card-item.striking {
+  animation: cardStrikeOpponent 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+  z-index: 200 !important;
+}
+
+/* Impact Tremor */
+.board-impact-shake {
+  animation: boardImpact 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes boardImpact {
+  10%, 90% { transform: translate3d(-3px, 1px, 0); }
+  20%, 80% { transform: translate3d(4px, -2px, 0); }
+  30%, 50%, 70% { transform: translate3d(-5px, 2px, 0); }
+  40%, 60% { transform: translate3d(5px, -1px, 0); }
+}
+
+/* Floating TCG Combat Text */
+.floating-dmg {
+  position: absolute;
+  font-size: 26px;
+  font-weight: 900;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.95);
+  pointer-events: none;
+  z-index: 500;
+  animation: floatCombatStat 1.1s forwards cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.floating-dmg.dmg {
+  color: #ff4d4d;
+}
+
+.floating-dmg.heal {
+  color: #4ade80;
+}
+
+.floating-dmg.shield {
+  color: #38bdf8;
+}
+
+@keyframes floatCombatStat {
+  0% { opacity: 1; transform: translateY(0) scale(1.3); }
+  20% { transform: translateY(-16px) scale(1.4); }
+  100% { opacity: 0; transform: translateY(-55px) scale(0.9); }
+}
+
+/* ==========================================================================
+   CARD ACTION INSPECTION MODAL (TACTILE STONE & GOLD)
+   ========================================================================== */
+.card-action-popover {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 4, 2, 0.85);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.card-action-popover.active {
+  display: flex;
+}
+
+.action-card-detail {
+  background: linear-gradient(180deg, #24170f 0%, #150c07 100%);
+  border: 3px solid var(--gold-primary);
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 440px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 160, 23, 0.3);
+  animation: modalPopIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPopIn {
+  from { opacity: 0; transform: scale(0.9) translateY(16px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.detail-img-wrap {
+  width: 100%;
+  height: 220px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid var(--gold-dark);
+}
+
+.detail-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-stats-bar {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #4a341d;
+}
+
+.action-buttons-wrap {
+  display: flex;
+  gap: 12px;
+}
+
+.act-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 14.5px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  transition: all 0.15s ease;
+}
+
+.act-btn.attack {
+  background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+  color: #fff;
+  border: 1.5px solid #f87171;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+}
+
+.act-btn.guard {
+  background: linear-gradient(180deg, #15803d 0%, #166534 100%);
+  color: #fff;
+  border: 1.5px solid #4ade80;
+  box-shadow: 0 4px 14px rgba(21, 128, 61, 0.4);
+}
+
+.act-btn.cancel {
+  background: #2a1f18;
+  color: #cbd5e1;
+  border: 1px solid #573f2f;
+}
+
+.act-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.15);
+}
+
+.act-btn:active {
+  transform: scale(0.96);
+}
+
+/* ==========================================================================
+   CARD DEX & SEARCH
+   ========================================================================== */
+.dex-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  background: #180f0a;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid #4a341d;
+}
+
+.category-filter-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  background: #24160d;
+  border: 1px solid #5a3e23;
+  color: #c7b89d;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.filter-pill:hover {
+  color: var(--gold-highlight);
+  border-color: var(--gold-primary);
+}
+
+.filter-pill.active {
+  background: var(--gold-primary);
+  color: #1a0f07;
+  border-color: var(--gold-highlight);
+  font-weight: 800;
+  box-shadow: 0 0 12px rgba(212, 160, 23, 0.5);
+}
+
+.search-input {
+  background: #0d0704;
+  border: 1px solid #5a3e23;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  min-width: 220px;
+}
+
+.search-input:focus {
+  border-color: var(--gold-primary);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+  gap: 20px;
+  padding: 10px 0;
+}
+
+/* ==========================================================================
+   PRINT & PLAY (A4 SHEETS & PRINT STYLES)
+   ========================================================================== */
+.print-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.print-toolbar {
+  background: #180f0a;
+  padding: 16px 24px;
+  border-radius: 12px;
+  border: 1px solid #4a341d;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.print-btn {
+  background: linear-gradient(180deg, #15803d 0%, #166534 100%);
+  color: #fff;
+  border: 1.5px solid #4ade80;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 12px 26px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 14px rgba(21, 128, 61, 0.4);
+}
+
+.print-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+}
+
+.a4-sheet {
+  background: #ffffff;
+  color: #111111;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto 30px auto;
+  padding: 10mm 8mm;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4mm;
+  box-sizing: border-box;
+}
+
+.sheet-title {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #555;
+  padding-bottom: 2mm;
+  border-bottom: 1px dashed #ccc;
+  margin-bottom: 2mm;
+}
+
+.print-card {
+  border: 1.2px dashed #888;
+  border-radius: 4mm;
+  padding: 2.5mm;
+  background: #fdfdfd;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 86mm;
+  width: 60mm;
+  box-sizing: border-box;
+  page-break-inside: avoid;
+}
+
+.print-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5mm;
+}
+
+.print-cost {
+  width: 6.5mm;
+  height: 6.5mm;
+  background: #0284c7;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9.5pt;
+  font-weight: 900;
+}
+
+.print-title {
+  font-size: 8.5pt;
+  font-weight: 800;
+  text-align: right;
+  line-height: 1.1;
+  color: #111;
+}
+
+.print-img {
+  width: 100%;
+  height: 38mm;
+  border-radius: 2mm;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  margin-bottom: 1.5mm;
+}
+
+.print-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.print-skill-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.5mm;
+  padding: 1.5mm;
+  font-size: 6.5pt;
+  line-height: 1.25;
+  color: #1e293b;
+  flex: 1;
+}
+
+.print-skill-name {
+  font-weight: 800;
+  color: #b91c1c;
+  display: block;
+}
+
+.print-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1mm;
+  font-size: 7.5pt;
+  font-weight: 800;
+}
+
+.print-atk { color: #dc2626; }
+.print-def { color: #15803d; }
+
+.print-card.card-back {
+  background: linear-gradient(135deg, #24140b 0%, #150b06 100%);
+  border: 1.5mm solid var(--gold-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+}
+
+.print-card-back-inner {
+  border: 1px dashed rgba(255, 234, 121, 0.4);
+  width: 90%;
+  height: 90%;
+  border-radius: 2mm;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3mm;
+}
+
+.back-logo {
+  font-size: 22pt;
+  color: var(--gold-highlight);
+}
+
+.back-text {
+  font-size: 9.5pt;
+  font-weight: 900;
+  color: var(--gold-highlight);
+  letter-spacing: 1.5px;
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 4, 2, 0.88);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-content {
+  background: #1c120a;
+  border-radius: 16px;
+  border: 2px solid var(--gold-primary);
+  max-width: 650px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+}
+
+.modal-header {
+  padding: 16px 22px;
+  background: #120b06;
+  border-bottom: 1px solid #4a341d;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gold-highlight);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #b5a489;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+.modal-body {
+  padding: 22px;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+.rule-box {
+  background: #120b06;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border-left: 4px solid var(--gold-primary);
+}
+
+.rule-box h3 {
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: #fff;
+}
+
+/* Print Specific */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  header, .tabletop-board, .nav-tabs, .print-toolbar, .modal-overlay, #cardActionModal {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+  .tab-content {
+    display: none !important;
+  }
+  #tab-print {
+    display: block !important;
+  }
+  .a4-sheet {
+    box-shadow: none !important;
+    margin: 0 auto !important;
+    page-break-after: always;
+  }
+}

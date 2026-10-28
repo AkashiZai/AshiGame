@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meme Duel: สงครามการ์ดเพื่อนแท้ (Tabletop TCG)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Tavern Header -->
+  <header>
+    <div class="logo-area">
+      <div class="tcg-emblem">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="logo-text">
+        <h1>MEME DUEL: สงครามการ์ดเพื่อนแท้</h1>
+        <span>Tabletop TCG Edition • กติกาง่าย เล่นสนุกกับเพื่อน</span>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-btn active" data-tab="tab-arena">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M14.5 2.5l7 7-8.5 8.5-7-7 8.5-8.5zM2 22l4-1-3-3-1 4z"/></svg>
+        <span>โต๊ะประลอง (Arena)</span>
+      </button>
+      <button class="nav-btn" data-tab="tab-print">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+        <span>พิมพ์การ์ดจริง A4</span>
+      </button>
+      <button class="nav-btn" data-tab="tab-dex">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+        <span>สารานุกรม (21 ใบ)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Body -->
+  <main>
+    <!-- Tab 1: Battle Arena Tabletop -->
+    <div id="tab-arena" class="tab-content active">
+      
+      <!-- Top Control Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <label for="gameModeSelect" style="font-size: 13px; font-weight: 700; color: var(--gold-highlight);">โหมดเกม:</label>
+          <select id="gameModeSelect" class="select-input" style="background: #180f0a; border: 1.5px solid var(--gold-dark); color: #fff; padding: 6px 12px; border-radius: 6px; font-weight: 700;">
+            <option value="bot">ดวลกับ AI บ็อตเพื่อนยาก</option>
+            <option value="multiplayer">🌐 เล่นออนไลน์ 2 เครื่อง (ห้องโค้ด 4 หลัก)</option>
+            <option value="pvp">ดวลกับเพื่อน (สลับกันเล่น 2 คน)</option>
+          </select>
+
+          <button id="openRoomModalBtn" class="btn-tactile" style="background: linear-gradient(180deg, #d4a017 0%, #8c6209 100%); color: #1a0f07; font-weight: 900; border: 1.5px solid var(--gold-highlight); cursor: pointer; padding: 6px 14px; border-radius: 6px;">
+            🏰 ห้อง 4 หลัก (Online)
+          </button>
+
+          <div id="activeRoomBadge" style="display: none; font-size: 12.5px; font-weight: 800; color: #4ade80; background: rgba(0,0,0,0.6); padding: 5px 14px; border-radius: 20px; border: 1.5px solid #22c55e;">
+            🟢 ห้อง: <span id="activeRoomCodeText">----</span> (<span id="playerRoleText">โฮสต์</span>)
+          </div>
+        </div>
+
+        <div id="turnBanner" style="font-size: 14px; font-weight: 800; color: var(--gold-highlight); background: rgba(0,0,0,0.6); padding: 5px 18px; border-radius: 20px; border: 1px solid var(--gold-dark);">
+          เทิร์นของผู้เล่น 1
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button id="soundToggleBtn" class="btn-tactile" style="background: #24140b; border: 1px solid var(--gold-dark); color: #c7b89d; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer;">
+            เสียง: เปิด
+          </button>
+          <button id="rulesBtn" class="btn-tactile" style="background: #24140b; border: 1px solid var(--gold-dark); color: #c7b89d; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer;">
+            กติกา
+          </button>
+          <button id="restartBtn" class="btn-tactile" style="background: #24140b; border: 1px solid var(--gold-dark); color: #c7b89d; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer;">
+            เริ่มใหม่
+          </button>
+        </div>
+      </div>
+
+      <!-- The Tabletop Felt Playmat -->
+      <div class="tabletop-board">
+
+        <!-- Opponent Hero Bar (Top) -->
+        <section id="p2Panel" class="hero-zone">
+          <div class="hero-frame-wrap" id="p2HeroWrap">
+            <div class="hero-portrait-socket">
+              <div class="hero-avatar">
+                <span class="hero-avatar-icon">🤖</span>
+              </div>
+              <div id="p2HpText" class="health-orb" title="พลังชีวิต (HP)">30</div>
+              <div id="p2ShieldText" class="armor-crest hidden" title="เกราะ (Shield)">0</div>
+            </div>
+
+            <div class="hero-meta">
+              <div id="p2Name" class="hero-title-name">บ็อตเพื่อนยาก (AI Bot)</div>
+              <div id="p2DeckCount" class="hero-sub-status">21 ใบในสำรับ</div>
+            </div>
+          </div>
+
+          <!-- Opponent Cards (Upside down card backs) -->
+          <div id="p2HandZone" class="enemy-hand-strip"></div>
+
+          <!-- Opponent Mana Crystals -->
+          <div class="mana-tray">
+            <div class="mana-counter-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#38bdf8"><path d="M12 2l8 8-8 12L4 10l8-8z"/></svg>
+              <span id="p2EnergyText">2/2</span>
+            </div>
+            <div id="p2EnergyOrbs" class="mana-crystals-row"></div>
+          </div>
+        </section>
+
+        <!-- Center Battleground (Duel Stage + Deck + Discard) -->
+        <section class="center-battleground">
+          
+          <!-- Left: Graveyard Slot -->
+          <div class="tabletop-slot">
+            <div class="slot-card-holder" id="graveyardSlot">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(212, 160, 23, 0.4)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            </div>
+            <span class="slot-label">สุสาน (Grave)</span>
+          </div>
+
+          <!-- Center: Live Clash Stage & Battle Ticker -->
+          <div class="duel-clash-stage" id="duelStage">
+            <div class="stage-combat-live">
+              <div id="battleTickerMsg" class="battle-ticker-msg">
+                คลิกที่การ์ดในมือเพื่อเลือก โจมตี หรือ ป้องกัน
+              </div>
+              <button id="endTurnBtn" class="turn-crown-btn">
+                <span>จบเทิร์น (End Turn)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: 3D Draw Deck Stack -->
+          <div class="tabletop-slot">
+            <div class="deck-stack-3d" id="drawDeckStack" title="กองการ์ดสำรับ">
+              <div class="deck-inner-seal">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+                <div id="p1DeckCount" class="deck-count-num">21</div>
+              </div>
+            </div>
+            <span class="slot-label">กองการ์ด (Deck)</span>
+          </div>
+
+        </section>
+
+        <!-- Player Hero Bar & Fanned Hand (Bottom) -->
+        <section id="p1Panel" class="hero-zone" style="margin-top: auto;">
+          <div class="hero-frame-wrap active-turn" id="p1HeroWrap">
+            <div class="hero-portrait-socket">
+              <div class="hero-avatar">
+                <span class="hero-avatar-icon">😎</span>
+              </div>
+              <div id="p1HpText" class="health-orb" title="พลังชีวิต (HP)">30</div>
+              <div id="p1ShieldText" class="armor-crest hidden" title="เกราะ (Shield)">0</div>
+            </div>
+
+            <div class="hero-meta">
+              <div id="p1Name" class="hero-title-name">ผู้เล่น 1 (Player 1)</div>
+              <div class="hero-sub-status">กำลังพร้อมลุย</div>
+            </div>
+          </div>
+
+          <!-- Player Mana Tray -->
+          <div class="mana-tray">
+            <div class="mana-counter-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#38bdf8"><path d="M12 2l8 8-8 12L4 10l8-8z"/></svg>
+              <span id="p1EnergyText">2/2</span>
+            </div>
+            <div id="p1EnergyOrbs" class="mana-crystals-row"></div>
+          </div>
+        </section>
+
+        <!-- Player Fanned Hand Zone -->
+        <div id="p1HandZone" class="fanned-hand-zone"></div>
+
+        <!-- Hidden Combat Log for record keeper & tests -->
+        <div id="combatLog" style="display: none;"></div>
+
+      </div>
+    </div>
+
+    <!-- Tab 2: Print & Play A4 -->
+    <div id="tab-print" class="tab-content">
+      <div class="print-view-container">
+        <div class="print-toolbar">
+          <div>
+            <h2 style="font-size: 19px; font-weight: 800; color: var(--gold-highlight); margin-bottom: 4px;">
+              แผ่นพิมพ์การ์ด Print & Play (A4 Standard)
+            </h2>
+            <p style="font-size: 13px; color: #b5a489;">
+              การ์ดทั้งหมด 21 ใบ จัดลงหน้ากระดาษ A4 ช่องละ 9 ใบ พร้อมเส้นประสำหรับตัด และลายหลังการ์ดสำหรับพิมพ์ประกบ
+            </p>
+          </div>
+          <button id="triggerPrintBtn" class="print-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+            <span>กดพิมพ์การ์ด / บันทึก PDF (Ctrl + P)</span>
+          </button>
+        </div>
+
+        <div id="printSheetsContainer"></div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Card Dex -->
+    <div id="tab-dex" class="tab-content">
+      <div style="margin-bottom: 14px;">
+        <h2 style="font-size: 22px; font-weight: 800; color: var(--gold-highlight);">สารานุกรมการ์ดมีม (Card Dex)</h2>
+        <p style="font-size: 13.5px; color: #b5a489;">
+          สำรวจข้อมูลการ์ดทั้ง 21 ใบ สเตตัส สกิลพิเศษ และประโยคประจำตัว
+        </p>
+      </div>
+
+      <div class="dex-toolbar">
+        <div class="category-filter-pills" id="dexFilterPills">
+          <button class="filter-pill active" data-filter="all">ทั้งหมด (21)</button>
+          <button class="filter-pill" data-filter="Tank">แทงค์</button>
+          <button class="filter-pill" data-filter="Fighter">ไฟท์เตอร์</button>
+          <button class="filter-pill" data-filter="Assassin">แอสซาซิน</button>
+          <button class="filter-pill" data-filter="Chaos">ปาร์ตี้ป่วน</button>
+          <button class="filter-pill" data-filter="Support">ซัพพอร์ต</button>
+        </div>
+        <input type="text" id="dexSearchInput" class="search-input" placeholder="ค้นหาการ์ด, สกิล, หรือคำพูด..." />
+      </div>
+
+      <div id="dexGrid" class="gallery-grid"></div>
+    </div>
+  </main>
+
+  <!-- Card Action Modal -->
+  <div id="cardActionModal" class="card-action-popover">
+    <div class="action-card-detail">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span id="actionModalTitle" style="font-size: 18px; font-weight: 800; color: var(--gold-highlight);"></span>
+        <span style="font-size: 14px; color: #38bdf8; font-weight: 800;">มานา: <span id="actionModalCost"></span></span>
+      </div>
+      <div id="actionModalSub" style="font-size: 12px; color: #94a3b8; margin-top: -8px;"></div>
+
+      <div class="detail-img-wrap">
+        <img id="actionModalImg" src="" alt="Card Detail" />
+      </div>
+
+      <div class="detail-stats-bar">
+        <span style="color: #f87171; font-weight: 800; font-size: 14px;">พลังโจมตี: <span id="actionModalAtk"></span></span>
+        <span style="color: #4ade80; font-weight: 800; font-size: 14px;">ค่าป้องกัน: <span id="actionModalDef"></span></span>
+      </div>
+
+      <div style="background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; border-left: 3px solid var(--gold-primary);">
+        <div style="font-size: 13px; color: var(--gold-highlight); font-weight: 800; margin-bottom: 3px;">สกิลพิเศษ</div>
+        <div id="actionModalSkill" style="font-size: 13px; line-height: 1.4; color: #f1f5f9;"></div>
+      </div>
+
+      <div id="actionModalQuote" style="font-size: 12px; font-style: italic; color: #fde047; text-align: center;"></div>
+
+      <div class="action-buttons-wrap">
+        <button id="actAttackBtn" class="act-btn attack">
+          <span>โจมตี (Attack)</span>
+          <span style="font-size: 11px; font-weight: normal; opacity: 0.9;">ทำดาเมจ + ปล่อยสกิล</span>
+        </button>
+        <button id="actGuardBtn" class="act-btn guard">
+          <span>ป้องกัน (Guard)</span>
+          <span style="font-size: 11px; font-weight: normal; opacity: 0.9;">เพิ่มเกราะ + บล็อก</span>
+        </button>
+        <button id="actCancelBtn" class="act-btn cancel">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rules Modal -->
+  <div id="rulesModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>กติกาการเล่น Meme Duel TCG</h2>
+        <button class="close-btn close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="rule-box">
+          <h3>1. เป้าหมายของเกม</h3>
+          <p>ผู้เล่นแต่ละคนเริ่มต้นด้วย <strong>HP 30 หน่วย</strong> ใครลด HP ของอีกฝ่ายเหลือ 0 ก่อนเป็นผู้ชนะ!</p>
+        </div>
+
+        <div class="rule-box">
+          <h3>2. พลังงาน (มานา) และการจั่วการ์ด</h3>
+          <p>
+            - ในเทิร์นแรก เริ่มต้นด้วย <strong>2 มานา</strong><br>
+            - ทุกครั้งที่เริ่มเทิร์นใหม่ มานาจะเพิ่มขึ้นทีละ 1 แต้ม (สูงสุด 6 แต้ม)<br>
+            - เริ่มต้นเทิร์น ผู้เล่นจะจั่วการ์ดขึ้นมือ 1 ใบอัตโนมัติ (การ์ดบนมือถือได้สูงสุด 7 ใบ)
+          </p>
+        </div>
+
+        <div class="rule-box">
+          <h3>3. การเล่นการ์ด: เลือกระหว่าง โจมตี หรือ ป้องกัน</h3>
+          <p>
+            เมื่อคลิกที่การ์ดในมือ จะสามารถเลือกได้ 2 ทาง:<br>
+            - <strong>[ โจมตี (Attack) ]</strong>: ใช้พลังโจมตี (ATK) ของการ์ดฟาดใส่คู่ต่อสู้ (ถ้ามีเกราะ เกราะจะรับแทนก่อน) พร้อมเปิดใช้เอฟเฟกต์สกิลพิเศษของการ์ด!<br>
+            - <strong>[ ป้องกัน (Guard) ]</strong>: นำค่า DEF ของการ์ดมาบวกเพิ่มเป็น <strong>เกราะ (Shield)</strong> ให้ตัวเองเพื่อป้องกันการโจมตีในเทิร์นหน้า
+          </p>
+        </div>
+
+        <div class="rule-box">
+          <h3>4. สายของการ์ดทั้ง 21 ใบ</h3>
+          <p>
+            - <strong>สายแทงค์ (Tank)</strong>: เน้นเกราะหนา และฟื้นฟู HP<br>
+            - <strong>สายไฟท์เตอร์ (Fighter)</strong>: พลังหมัดหนัก และเจาะเกราะ<br>
+            - <strong>สายแอสซาซิน (Assassin)</strong>: ดูดเลือด และความเร็วสูง<br>
+            - <strong>สายปาร์ตี้ป่วน (Chaos)</strong>: ติดพิษ ระเบิดนิวเคลียร์ หรือขโมยการ์ด<br>
+            - <strong>สายซัพพอร์ต (Support)</strong>: ล้างมลทิน เพิ่มมานา และฮีล
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Room Setup Modal (4-Digit Code Multiplayer) -->
+  <div id="roomModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 640px;">
+      <div class="modal-header">
+        <h2>🌐 ดวลการ์ดออนไลน์ 2 เครื่อง (ห้องโค้ด 4 หลัก)</h2>
+        <button class="close-btn close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+        <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.5;">
+          เล่นแยกหน้าจอกับเพื่อน (คอม 2 เครื่อง หรือ คอมกับมือถือ) <strong>เพื่อซ่อนการ์ดในมือ ไม่ให้เห็นการ์ดกัน</strong>
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+          
+          <!-- Host Box -->
+          <div style="background: #120b06; border: 2px solid var(--gold-primary); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;">
+            <div style="font-size: 32px;">🏰</div>
+            <div style="font-size: 16px; font-weight: 800; color: var(--gold-highlight);">เครื่องที่ 1: สร้างห้อง</div>
+            <p style="font-size: 12px; color: #a89984;">สร้างห้องใหม่และรับโค้ด 4 หลักเพื่อส่งให้เพื่อน</p>
+            
+            <button id="createRoomBtn" class="turn-crown-btn" style="width: 100%; justify-content: center; font-size: 14px;">
+              กดสร้างห้องใหม่
+            </button>
+
+            <!-- Created Code Display -->
+            <div id="createdRoomCodeBox" style="display: none; flex-direction: column; align-items: center; gap: 8px; width: 100%; margin-top: 6px;">
+              <div style="font-size: 12px; color: #4ade80; font-weight: 700;">โค้ดห้องของคุณคือ:</div>
+              <div id="displayRoomCode" style="font-size: 38px; font-weight: 900; letter-spacing: 8px; color: var(--gold-highlight); background: #000; border: 2px solid var(--gold-highlight); border-radius: 8px; padding: 6px 16px; width: 100%; text-shadow: 0 0 10px rgba(255, 234, 121, 0.5);">
+                ----
+              </div>
+              <div id="hostWaitingStatus" style="font-size: 12.5px; color: #fde047; margin-top: 4px; font-weight: 700;">
+                ⏳ กำลังรอเพื่อนกรอกโค้ดเข้าร่วม...
+              </div>
+
+              <!-- Shareable IP / URL for Phone or another PC -->
+              <div id="hostServerInfoBox" style="display: none; width: 100%; margin-top: 6px; background: rgba(0,0,0,0.6); border: 1.5px solid var(--gold-dark); border-radius: 8px; padding: 10px; text-align: left; font-size: 11.5px;">
+                <div style="color: var(--gold-highlight); font-weight: 800; margin-bottom: 4px;">📱 ให้เพื่อนเปิดเว็บนี้บนมือถือ / แท็บเล็ต:</div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <input type="text" id="hostServerUrlInput" readonly style="flex: 1; background: #000; border: 1px solid #444; color: #38bdf8; font-weight: 700; padding: 5px 8px; border-radius: 4px; font-size: 12px; font-family: monospace;" />
+                  <button id="copyServerLinkBtn" type="button" style="background: var(--gold-dark); color: #fff; border: none; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                    คัดลอก
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Join Box -->
+          <div style="background: #120b06; border: 2px solid #38bdf8; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;">
+            <div style="font-size: 32px;">🚪</div>
+            <div style="font-size: 16px; font-weight: 800; color: #38bdf8;">เครื่องที่ 2: เข้าห้องเพื่อน</div>
+            <p style="font-size: 12px; color: #a89984;">กรอกโค้ด 4 หลักที่ได้จากเพื่อนเครื่องแรก</p>
+
+            <input type="text" id="joinRoomInput" maxlength="4" placeholder="----" style="font-size: 28px; font-weight: 900; letter-spacing: 6px; text-align: center; background: #000; border: 2px solid #38bdf8; color: #38bdf8; border-radius: 8px; padding: 8px; width: 150px; outline: none; font-family: monospace;" />
+
+            <button id="joinRoomBtn" class="act-btn" style="width: 100%; background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%); color: #fff; font-size: 14px; padding: 10px; border-radius: 8px; font-weight: 800; border: 1.5px solid #38bdf8;">
+              เข้าร่วมห้อง
+            </button>
+
+            <div id="joinStatusText" style="font-size: 12px; color: #cbd5e1; min-height: 18px;"></div>
+          </div>
+
+        </div>
+
+        <div style="background: rgba(0,0,0,0.3); border: 1px dashed var(--gold-dark); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #a89984;">
+          💡 <strong>คำแนะนำ:</strong> หากต้องการเล่นด้วยคอมกับมือถือบน Wi-Fi เดียวกัน ให้รันไฟล์ <code>start_multiplayer.bat</code> แล้วเปิดลิงก์ IP บนมือถือได้เลยครับ
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Modal -->
+  <div id="gameOverModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px; text-align: center; padding: 24px;">
+      <div style="font-size: 52px; margin-bottom: 10px;">🏆</div>
+      <h2 id="winnerTitle" style="font-size: 22px; color: var(--gold-highlight); margin-bottom: 8px;">ผู้ชนะคือ...</h2>
+      <p id="winnerMessage" style="font-size: 14px; color: #cbd5e1; margin-bottom: 24px;"></p>
+      <button id="rematchBtn" onclick="window.memeGame.startNewGame()" style="justify-content: center; width: 100%; padding: 12px; font-size: 16px; background: linear-gradient(180deg, #d4a017 0%, #8c6209 100%); color: #1a0f07; border: 2px solid var(--gold-highlight); border-radius: 8px; font-family: inherit; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.6);">
+        เล่นใหม่อีกเกม (Rematch)
+      </button>
+    </div>
+  </div>
+
+  <script src="peerjs.min.js"></script>
+  <script src="cards.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
