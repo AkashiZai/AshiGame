@@ -1784,3 +1784,471 @@ main {
   #tab-print { display: block !important; }
   .a4-sheet { box-shadow: none !important; margin: 0 auto !important; page-break-after: always; }
 }
+
+/* Persistent minion combat field */
+.tabletop-board {
+  min-height: 640px;
+  padding: 8px 54px 4px;
+}
+
+.hero-zone {
+  min-height: 78px;
+}
+
+.hero-frame-wrap {
+  padding: 4px 72px 4px 10px;
+  transform: scale(.88);
+}
+
+.hero-frame-wrap::after {
+  display: none;
+}
+
+.hero-portrait-socket {
+  width: 62px;
+  height: 68px;
+}
+
+.hero-avatar {
+  border-radius: 50%;
+}
+
+.hero-avatar-icon {
+  font-size: 34px;
+}
+
+.center-battleground {
+  grid-template-columns: 66px minmax(0, 1fr) 66px;
+  gap: 8px;
+  min-height: 272px;
+}
+
+.tabletop-slot {
+  transform: scale(.82);
+}
+
+.duel-clash-stage {
+  height: auto;
+  min-height: 258px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 5px;
+  padding: 8px 10px;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 241, 204, .25), transparent 66%),
+    linear-gradient(180deg, rgba(82, 54, 25, .12), rgba(75, 49, 24, .22));
+  box-shadow: inset 0 0 26px rgba(77, 51, 25, .28);
+}
+
+.battlefield-lane {
+  position: relative;
+  z-index: 24;
+  min-height: 98px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.lane-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(100%, 620px);
+  margin: 0 auto;
+  color: rgba(73, 43, 19, .82);
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-shadow: 0 1px rgba(255, 245, 220, .55);
+}
+
+.minion-row {
+  width: min(100%, 680px);
+  min-height: 82px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 1.5vw, 18px);
+  position: relative;
+}
+
+.battlefield-midline {
+  position: relative;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid rgba(103, 70, 36, .25);
+  border-bottom: 1px solid rgba(103, 70, 36, .25);
+}
+
+.lane-divider-rune {
+  color: rgba(131, 88, 38, .55);
+  font-size: 18px;
+  text-shadow: 0 0 10px rgba(255, 247, 208, .9);
+}
+
+.battle-ticker-msg {
+  max-width: min(62%, 490px);
+  padding: 4px 14px;
+  color: #fff7df;
+  font-size: 11px;
+  letter-spacing: .1px;
+  text-shadow: 0 1px 3px #281507;
+  border-color: rgba(153, 112, 42, .8);
+  background: rgba(34, 23, 13, .76);
+}
+
+.battle-ticker-msg.targeting {
+  color: #fff3a1;
+  border-color: #65e58c;
+  box-shadow: 0 0 15px rgba(74, 222, 128, .44), 0 4px 14px rgba(0, 0, 0, .7);
+}
+
+.turn-crown-btn {
+  right: -42px;
+  width: 102px;
+  height: 46px;
+  font-size: 12px;
+}
+
+.turn-crown-btn small {
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.minion-token {
+  --minion-glow: rgba(120, 232, 164, .8);
+  width: clamp(54px, 6.5vw, 78px);
+  height: clamp(69px, 8.2vw, 96px);
+  flex: 0 1 78px;
+  position: relative;
+  isolation: isolate;
+  border: 3px solid #c18a2a;
+  border-radius: 48% 48% 42% 42% / 42% 42% 48% 48%;
+  background: radial-gradient(ellipse at 50% 26%, #705533 0%, #332216 64%, #100b07 100%);
+  box-shadow: inset 0 0 0 2px rgba(255, 231, 159, .35), 0 5px 10px rgba(28, 16, 7, .7);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+  transform: translateZ(0);
+}
+
+.minion-token:hover {
+  z-index: 5;
+  transform: translateY(-5px) scale(1.06);
+  filter: brightness(1.1);
+}
+
+.minion-art {
+  position: absolute;
+  inset: 3px 3px 13px;
+  overflow: hidden;
+  border-radius: 48% 48% 40% 40% / 42% 42% 45% 45%;
+  background: #130e08;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, .8);
+}
+
+.minion-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.12) contrast(1.04);
+}
+
+.minion-name {
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  bottom: 8px;
+  z-index: 2;
+  overflow: hidden;
+  padding: 1px 4px;
+  color: #fff7d2;
+  background: linear-gradient(90deg, transparent, rgba(42, 23, 8, .94) 16%, rgba(42, 23, 8, .94) 84%, transparent);
+  font-size: clamp(7px, .73vw, 9px);
+  line-height: 1.15;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px #000;
+}
+
+.minion-stat {
+  position: absolute;
+  z-index: 4;
+  bottom: -7px;
+  width: 25px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #fff0aa;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 900;
+  text-shadow: 0 2px 3px #000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .85);
+}
+
+.minion-atk {
+  left: -8px;
+  background: radial-gradient(circle at 35% 28%, #ffe67b, #d88413 72%, #713f12);
+}
+
+.minion-health {
+  right: -8px;
+  background: radial-gradient(circle at 35% 28%, #ff8686, #bf2020 72%, #450a0a);
+}
+
+.minion-token.can-attack {
+  --minion-glow: rgba(78, 239, 141, .95);
+  border-color: #9af3a9;
+  box-shadow: 0 0 0 2px rgba(28, 117, 54, .8), 0 0 14px var(--minion-glow), 0 5px 11px rgba(22, 20, 7, .75);
+}
+
+.minion-token.can-attack::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  z-index: -1;
+  border: 1px solid rgba(93, 244, 150, .55);
+  border-radius: 50%;
+  animation: readyPulse 1.7s ease-in-out infinite;
+}
+
+.minion-token.is-selected {
+  z-index: 8;
+  transform: translateY(-9px) scale(1.12);
+  border-color: #fff5a1;
+  box-shadow: 0 0 0 3px rgba(255, 223, 70, .9), 0 0 28px 8px rgba(255, 222, 63, .83), 0 10px 20px rgba(0, 0, 0, .75);
+}
+
+.minion-token.valid-target {
+  cursor: crosshair;
+  border-color: #fff0a1;
+  box-shadow: 0 0 0 2px rgba(255, 221, 72, .85), 0 0 19px rgba(255, 91, 57, .86), 0 5px 11px rgba(0, 0, 0, .75);
+}
+
+.hero-frame-wrap.valid-target {
+  border-color: #ffd45b;
+  box-shadow: 0 0 0 3px rgba(255, 200, 48, .62), 0 0 25px rgba(255, 78, 47, .8), 0 8px 20px rgba(0, 0, 0, .85);
+  cursor: crosshair;
+}
+
+.hero-frame-wrap:focus-visible,
+.minion-token:focus-visible {
+  outline: 3px solid #fff4a3;
+  outline-offset: 3px;
+}
+
+.minion-token.has-taunt {
+  border-color: #75d8ff;
+  box-shadow: inset 0 0 0 2px rgba(202, 243, 255, .45), 0 0 12px rgba(56, 189, 248, .6), 0 5px 10px rgba(0, 0, 0, .7);
+}
+
+.minion-taunt {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  z-index: 5;
+  transform: translateX(-50%);
+  padding: 0 4px;
+  border: 1px solid #dff6ff;
+  border-radius: 8px;
+  color: #eafaff;
+  background: linear-gradient(#3ba8d1, #15526c);
+  font-size: 7px;
+  line-height: 1.25;
+  font-weight: 900;
+  letter-spacing: .3px;
+}
+
+.sleeping-mark {
+  position: absolute;
+  top: 1px;
+  right: 2px;
+  z-index: 5;
+  color: #c7d3ea;
+  font-size: 15px;
+  text-shadow: 0 1px 3px #000;
+}
+
+.minion-token.minion-summoning {
+  animation: minionSummon .72s cubic-bezier(.16, .9, .25, 1.2) both;
+}
+
+.minion-token.attack-up {
+  z-index: 12;
+  animation: minionAttackUp .48s cubic-bezier(.18, .9, .25, 1.2) both;
+}
+
+.minion-token.attack-down {
+  z-index: 12;
+  animation: minionAttackDown .48s cubic-bezier(.18, .9, .25, 1.2) both;
+}
+
+.battle-hit {
+  animation: battleHit .44s ease both;
+}
+
+.minion-damage-pop {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  z-index: 30;
+  color: #fff;
+  font-size: 23px;
+  font-weight: 900;
+  text-shadow: 0 2px 4px #000, 0 0 8px #ef4444;
+  animation: damageFloat .8s ease-out both;
+  pointer-events: none;
+}
+
+.card-item.is-dragging {
+  opacity: .72;
+  filter: brightness(1.2);
+  transform: translateY(-18px) scale(1.06) !important;
+}
+
+.combat-log {
+  position: absolute;
+  z-index: 35;
+  left: 12px;
+  top: 50%;
+  width: 154px;
+  max-height: 126px;
+  overflow: hidden auto;
+  padding: 5px 7px;
+  border: 1px solid rgba(161, 125, 76, .75);
+  border-radius: 9px;
+  color: #f5e5c7;
+  background: rgba(23, 15, 9, .76);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .55), inset 0 0 12px rgba(0, 0, 0, .32);
+  font-size: 9px;
+  line-height: 1.25;
+  transform: translateY(-50%);
+  scrollbar-width: thin;
+  scrollbar-color: #a17d4c transparent;
+}
+
+.combat-log .log-entry {
+  margin: 3px 0;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(220, 194, 150, .12);
+  overflow-wrap: anywhere;
+}
+
+.combat-log .log-entry.damage { color: #ffaaaa; }
+.combat-log .log-entry.skill { color: #f8dc8c; }
+.combat-log .log-entry.victory { color: #a7f3b7; }
+
+@keyframes readyPulse {
+  0%, 100% { opacity: .45; transform: scale(.96); }
+  50% { opacity: .95; transform: scale(1.04); }
+}
+
+@keyframes minionSummon {
+  0% { opacity: 0; transform: translateY(80px) scale(.35) rotate(-12deg); filter: brightness(2.2); }
+  48% { opacity: 1; transform: translateY(-12px) scale(1.22) rotate(3deg); filter: brightness(1.5); }
+  76% { transform: translateY(4px) scale(.94) rotate(-1deg); }
+  100% { transform: translateY(0) scale(1) rotate(0); filter: brightness(1); }
+}
+
+@keyframes minionAttackUp {
+  0%, 100% { transform: translateY(0) scale(1); }
+  52% { transform: translateY(-72px) scale(1.22) rotate(-3deg); filter: brightness(1.45); }
+}
+
+@keyframes minionAttackDown {
+  0%, 100% { transform: translateY(0) scale(1); }
+  52% { transform: translateY(72px) scale(1.22) rotate(3deg); filter: brightness(1.45); }
+}
+
+@keyframes battleHit {
+  0%, 100% { transform: translateX(0); filter: brightness(1); }
+  22% { transform: translateX(-7px) rotate(-4deg); filter: brightness(1.8) saturate(1.6); }
+  48% { transform: translateX(7px) rotate(4deg); }
+  72% { transform: translateX(-3px); filter: brightness(1.25); }
+}
+
+@keyframes damageFloat {
+  0% { opacity: 0; transform: translate(-50%, 8px) scale(.55); }
+  22% { opacity: 1; transform: translate(-50%, -8px) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -42px) scale(.9); }
+}
+
+@media (max-width: 900px) {
+  .tabletop-board { padding-left: 38px; padding-right: 38px; }
+  .center-battleground { grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 2px; }
+  .tabletop-slot { transform: scale(.66); }
+  .turn-crown-btn { right: -30px; width: 88px; }
+  .battle-ticker-msg { max-width: 66%; font-size: 10px; padding-inline: 8px; }
+  .minion-row { gap: clamp(3px, .8vw, 10px); }
+}
+
+@media (max-width: 640px) {
+  header { padding: 6px 10px; flex-wrap: wrap; gap: 6px; }
+  .logo-text h1 { font-size: 13px; }
+  .logo-text span { font-size: 9px; }
+  .nav-tabs { width: 100%; justify-content: center; }
+  .nav-btn { padding: 5px 8px; font-size: 10px; }
+  .top-control-bar { flex-wrap: wrap; gap: 6px; padding: 7px; }
+  .ctrl-group-left, .ctrl-group-right { gap: 5px; flex-wrap: wrap; }
+  .turn-banner-pill { order: 3; width: 100%; text-align: center; }
+  .tabletop-board { min-height: 540px; padding: 5px 8px 0; border-width: 8px; border-radius: 20px; }
+  .hero-zone { min-height: 68px; }
+  .hero-frame-wrap { transform: scale(.72); }
+  .hero-meta { left: -32px; }
+  .combat-log { display: none; }
+  .hero-title-name { font-size: 10px; }
+  .hero-sub-status { font-size: 8px; }
+  .mana-tray { right: 0; padding: 3px 6px; gap: 3px; transform: scale(.82); transform-origin: right center; }
+  .mana-gem { width: 12px; height: 15px; }
+  .center-battleground { grid-template-columns: 29px minmax(0, 1fr) 29px; min-height: 232px; }
+  .tabletop-slot { transform: scale(.5); }
+  .slot-card-holder, .deck-stack-3d { width: 54px; height: 76px; }
+  .slot-label { display: none; }
+  .duel-clash-stage { min-height: 222px; padding: 5px 3px; gap: 2px; }
+  .battlefield-lane { min-height: 83px; gap: 2px; }
+  .lane-caption { font-size: 8px; }
+  .minion-row { min-height: 70px; gap: 2px; }
+  .minion-token { width: clamp(38px, 11vw, 56px); height: 69px; flex-basis: clamp(38px, 11vw, 56px); border-width: 2px; }
+  .minion-art { inset: 2px 2px 11px; }
+  .minion-name { left: -7px; right: -7px; bottom: 7px; font-size: 7px; }
+  .minion-stat { width: 20px; height: 21px; font-size: 11px; bottom: -6px; }
+  .minion-taunt { font-size: 6px; top: -4px; }
+  .battlefield-midline { min-height: 28px; }
+  .lane-divider-rune { display: none; }
+  .battle-ticker-msg { max-width: calc(100% - 76px); font-size: 8px; padding: 3px 5px; }
+  .turn-crown-btn { right: 0; width: 72px; height: 34px; font-size: 9px; border-width: 2px; }
+  .turn-crown-btn small { font-size: 7px; }
+  .fanned-hand-zone { height: 145px; margin-top: -5px; }
+  :root { --card-width: 78px; --card-height: 116px; }
+  .card-item { padding: 4px 3px 5px; border-width: 2px; border-radius: 10px; }
+  .card-mana-gem { width: 25px; height: 29px; top: -6px; left: -5px; font-size: 14px; }
+  .card-class-seal { top: 2px; right: 2px; font-size: 6px; padding: 0 3px; }
+  .card-art-frame { height: 50px; margin-top: 4px; border-width: 2px; }
+  .card-banner-ribbon { margin-top: -6px; padding: 1px 3px; }
+  .card-title-text { font-size: 7px; }
+  .card-rules-parchment { padding: 2px; margin-top: 2px; }
+  .skill-headline { font-size: 6.5px; }
+  .skill-description { font-size: 5.5px; }
+  .stat-crest { width: 23px; height: 24px; font-size: 12px; }
+  .stat-crest.defense-crest { height: 26px; }
+  .fanned-hand-zone .card-item:hover { transform: translateX(var(--card-tx, 0px)) translateY(-30px) rotate(0deg) scale(1.12) !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+}

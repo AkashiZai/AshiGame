@@ -113,7 +113,12 @@ class MemeGame {
     this.round = 1;
     this.gameOver = false;
     this.pendingCard = null;
+    this.selectedAttacker = null;
+    this.suppressNextCardClick = false;
+    this.p1TurnCount = 0;
     this.isBotThinking = false;
+    this.isResolvingCombat = false;
+    this.combatGeneration = 0;
 
     // Multiplayer Networking State
     this.isMultiplayer = false;
@@ -148,6 +153,7 @@ class MemeGame {
       deck: [],
       hand: [],
       discard: [],
+      board: [],
       poison: 0,
       weaken: 0,
       silenced: false,
@@ -187,6 +193,9 @@ class MemeGame {
     this.combatLog = document.getElementById('combatLog');
     this.p1HandZone = document.getElementById('p1HandZone');
     this.p2HandZone = document.getElementById('p2HandZone');
+    this.p1BoardZone = document.getElementById('p1BoardZone');
+    this.p2BoardZone = document.getElementById('p2BoardZone');
+    this.battleTickerMsg = document.getElementById('battleTickerMsg');
 
     // Stats Elements P1
     this.p1Name = document.getElementById('p1Name');
@@ -309,17 +318,10 @@ class MemeGame {
       });
     });
 
-    // Card Action Popover Buttons
-    document.getElementById('actAttackBtn').addEventListener('click', () => {
+    // Card preview / summon button
+    document.getElementById('actSummonBtn').addEventListener('click', () => {
       if (this.pendingCard) {
-        this.executeCardAction(this.pendingCard, 'attack');
-        this.closeCardAction();
-      }
-    });
-
-    document.getElementById('actGuardBtn').addEventListener('click', () => {
-      if (this.pendingCard) {
-        this.executeCardAction(this.pendingCard, 'guard');
+        this.summonMinion(this.pendingCard.card, this.pendingCard.playerKey);
         this.closeCardAction();
       }
     });
@@ -331,6 +333,34 @@ class MemeGame {
     // Print Button
     document.getElementById('triggerPrintBtn').addEventListener('click', () => {
       window.print();
+    });
+
+    // Targeting works with clicks/taps and drag-and-drop.
+    this.p1BoardZone.addEventListener('click', (event) => this.handleMinionLaneClick(event, this.p1BoardZone));
+    this.p2BoardZone.addEventListener('click', (event) => this.handleMinionLaneClick(event, this.p2BoardZone));
+    this.p1BoardZone.addEventListener('dragstart', (event) => this.handleMinionDragStart(event));
+    this.p2BoardZone.addEventListener('dragstart', (event) => this.handleMinionDragStart(event));
+    this.p1BoardZone.addEventListener('dragover', (event) => event.preventDefault());
+    this.p2BoardZone.addEventListener('dragover', (event) => event.preventDefault());
+    this.p1BoardZone.addEventListener('drop', (event) => this.handleLaneDrop(event, this.p1BoardZone));
+    this.p2BoardZone.addEventListener('drop', (event) => this.handleLaneDrop(event, this.p2BoardZone));
+
+    this.p1HeroWrap = document.getElementById('p1HeroWrap');
+    this.p2HeroWrap = document.getElementById('p2HeroWrap');
+    this.p1HeroWrap.addEventListener('click', () => this.handleHeroTarget('bottom'));
+    this.p2HeroWrap.addEventListener('click', () => this.handleHeroTarget('top'));
+    [this.p1HeroWrap, this.p2HeroWrap].forEach((heroWrap) => {
+      heroWrap.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        this.handleHeroTarget(heroWrap === this.p1HeroWrap ? 'bottom' : 'top');
+      });
+      heroWrap.addEventListener('dragover', (event) => event.preventDefault());
+      heroWrap.addEventListener('drop', (event) => {
+        event.preventDefault();
+        const minion = this.readDraggedMinion(event);
+        if (minion) this.attackWithMinion(minion.playerKey, minion.minionId, { type: 'hero', targetPlayerKey: heroWrap === this.p1HeroWrap ? this.getMyPlayerKey() : this.getOpponentPlayerKey() });
+      });
     });
   }
 
@@ -664,6 +694,11 @@ class MemeGame {
       this.p2.deck = [...action.p2Deck];
       this.p1.hand = [...action.p1Hand];
       this.p2.hand = [...action.p2Hand];
+      this.p1.board = [];
+      this.p2.board = [];
+      this.p1.discard = [];
+      this.p2.discard = [];
+      this.selectedAttacker = null;
       this.p1.hp = 30;
       this.p2.hp = 30;
       this.p1.shield = 0;
@@ -673,6 +708,9 @@ class MemeGame {
       this.p1.maxEnergy = 2;
       this.p2.maxEnergy = 2;
       this.round = action.round || 1;
+      this.p1TurnCount = 1;
+      this.isResolvingCombat = false;
+      this.combatGeneration++;
       this.turn = action.turn || 'p1';
       this.gameOver = false;
       this.isBotThinking = false;
@@ -686,9 +724,20 @@ class MemeGame {
       return;
     }
 
-    if (action.type === 'PLAY_CARD') {
+    if (action.type === 'SUMMON_MINION') {
       if (evt.playerKey !== this.getMyPlayerKey()) {
-        this.executeCardAction({ card: action.card, playerKey: evt.playerKey }, action.choice, false);
+        this.summonMinion(action.card, evt.playerKey, false, action.minionId);
+      }
+      return;
+    }
+
+    if (action.type === 'ATTACK_MINION') {
+      if (evt.playerKey !== this.getMyPlayerKey()) {
+        this.attackWithMinion(action.playerKey, action.minionId, {
+          type: action.targetType,
+          targetPlayerKey: action.targetPlayerKey,
+          targetMinionId: action.targetMinionId
+        }, false);
       }
       return;
     }
@@ -713,7 +762,12 @@ class MemeGame {
     this.round = 1;
     this.turn = 'p1';
     this.isBotThinking = false;
+    this.isResolvingCombat = false;
+    this.combatGeneration++;
+    this.p1TurnCount = 1;
+    this.selectedAttacker = null;
     this.combatLog.innerHTML = '';
+    this.closeCardAction();
 
     const p1Deck = this.shuffleDeck(CARDS_DATA);
     const p2Deck = this.shuffleDeck(CARDS_DATA);
@@ -732,6 +786,11 @@ class MemeGame {
     this.p2.deck = p2Deck;
     this.p1.hand = p1Hand;
     this.p2.hand = p2Hand;
+    this.p1.discard = [];
+    this.p2.discard = [];
+    this.p1.board = [];
+    this.p2.board = [];
+    this.selectedAttacker = null;
 
     this.broadcastAction({
       type: 'INIT_GAME',
@@ -818,7 +877,12 @@ class MemeGame {
     this.round = 1;
     this.turn = 'p1';
     this.isBotThinking = false;
+    this.isResolvingCombat = false;
+    this.combatGeneration++;
+    this.p1TurnCount = 0;
+    this.selectedAttacker = null;
     this.combatLog.innerHTML = '';
+    this.closeCardAction();
 
     // Close Game Over Modal if open
     if (this.gameOverModal) {
@@ -877,18 +941,24 @@ class MemeGame {
 
   startTurn(playerKey) {
     this.turn = playerKey;
+    this.selectedAttacker = null;
     const player = playerKey === 'p1' ? this.p1 : this.p2;
     const opponent = playerKey === 'p1' ? this.p2 : this.p1;
 
-    // Increase max energy each round up to 6
+    // Increase max energy once each time player one starts a turn, up to six.
     if (playerKey === 'p1') {
       this.round++;
-      const targetMax = Math.min(2 + Math.floor(this.round / 2), 6);
+      const targetMax = Math.min(2 + this.p1TurnCount, 6);
+      this.p1TurnCount++;
       this.p1.maxEnergy = targetMax;
       this.p2.maxEnergy = targetMax;
     }
 
     player.energy = player.maxEnergy;
+    player.board.forEach((minion) => {
+      minion.canAttack = true;
+      minion.summoningSick = false;
+    });
 
     // Reset temporary debuffs/effects
     player.silenced = false;
@@ -916,7 +986,7 @@ class MemeGame {
   }
 
   endCurrentTurn(isLocal = true) {
-    if (this.gameOver || this.isBotThinking) return;
+    if (this.gameOver || this.isBotThinking || this.isResolvingCombat) return;
 
     if (this.isMultiplayer && isLocal && this.turn !== this.getMyPlayerKey()) {
       this.addLog(`⏳ ยังไม่ใช่เทิร์นของคุณ!`);
@@ -950,7 +1020,11 @@ class MemeGame {
 
     const player = playerKey === 'p1' ? this.p1 : this.p2;
     if (player.energy < card.cost) {
-      this.addLog(`❌ Energy ไม่พอ! ต้องการ ${card.cost} แต้ม (คุณมี ${player.energy})`);
+      this.addLog(`❌ มานาไม่พอ! ต้องการ ${card.cost} แต้ม (คุณมี ${player.energy})`);
+      return;
+    }
+    if (player.board.length >= 7) {
+      this.addLog(`สนามของ ${player.name} เต็มแล้ว (สูงสุด 7 มินเนียน)`);
       return;
     }
 
@@ -974,75 +1048,249 @@ class MemeGame {
     this.cardActionModal.classList.remove('active');
   }
 
-  executeCardAction(actionData, choice, isLocal = true) {
-    const { card, playerKey } = actionData;
-    const player = playerKey === 'p1' ? this.p1 : this.p2;
-    const opponent = playerKey === 'p1' ? this.p2 : this.p1;
+  executeCardAction(actionData, _choice, isLocal = true) {
+    this.summonMinion(actionData.card, actionData.playerKey, isLocal);
+  }
 
-    // Deduct cost
-    player.energy = Math.max(0, player.energy - card.cost);
+  summonMinion(card, playerKey, isLocal = true, sharedId = null) {
+    if (this.gameOver || !card || this.turn !== playerKey) return;
+    if (this.isMultiplayer && isLocal && playerKey !== this.getMyPlayerKey()) return;
 
-    // Remove from hand, add to discard
-    const handIdx = player.hand.findIndex(c => c.id === card.id);
-    if (handIdx !== -1) {
-      player.hand.splice(handIdx, 1);
-      player.discard.push(card);
+    const player = this[playerKey];
+    const opponent = this[playerKey === 'p1' ? 'p2' : 'p1'];
+    if (!player || player.energy < card.cost || player.board.length >= 7) return;
+
+    const handIndex = player.hand.findIndex((held) => held.id === card.id);
+    if (handIndex === -1) return;
+
+    player.energy -= card.cost;
+    const playedCard = player.hand.splice(handIndex, 1)[0];
+    const minionId = sharedId || `${playerKey}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const minion = {
+      id: minionId,
+      card: playedCard,
+      atk: playedCard.atk,
+      health: playedCard.def,
+      maxHealth: playedCard.def,
+      taunt: playedCard.category === 'Tank',
+      canAttack: false,
+      summoningSick: true
+    };
+    player.board.push(minion);
+
+    this.addLog(`✨ ${player.name} อัญเชิญ "${playedCard.name}" ลงสนาม`,'skill');
+    sfx.play('skill');
+
+    if (!player.silenced) {
+      this.triggerCardSkill(playedCard, player, opponent, 'summon');
+    } else {
+      this.addLog(`🤐 ${player.name} ถูกใบ้ เอฟเฟกต์อัญเชิญไม่ทำงาน`);
     }
 
-    this.showClashCard(card, player, choice);
-
-    if (choice === 'attack') {
-      sfx.play('attack');
-      let baseAtk = card.atk;
-
-      // Check debuffs
-      if (player.weaken > 0) {
-        baseAtk = Math.max(1, baseAtk - player.weaken);
-        player.weaken = 0;
-        this.addLog(`⚠️ การโจมตีของ ${player.name} ลดลงเนื่องจากติดคราบมัน/อ่อนแรง!`);
-      }
-
-      if (player.blinded) {
-        baseAtk = 1;
-        player.blinded = false;
-        this.addLog(`👁️ ${player.name} ตาพร่ามัว โจมตีโดนเพียง 1 ดาเมจ!`);
-      }
-
-      // Deal damage
-      this.dealDamage(opponent, baseAtk, player.name);
-
-      // Trigger Skill
-      if (!player.silenced) {
-        this.triggerCardSkill(card, player, opponent, 'attack');
-      } else {
-        this.addLog(`🤐 ${player.name} โดนใบ้ ไม่สามารถใช้สกิลพิเศษได้!`);
-      }
-    } else if (choice === 'guard') {
-      sfx.play('guard');
-      const addShield = card.def;
-      player.shield += addShield;
-      this.showFloatingText(player, `+${addShield} 🛡️`, 'shield');
-      this.addLog(`🛡️ ${player.name} ใช้การ์ด "${card.name}" เพิ่มเกราะ +${addShield} (เกราะรวม: ${player.shield})`);
-
-      if (!player.silenced) {
-        this.triggerCardSkill(card, player, opponent, 'guard');
-      }
+    if (this.isMultiplayer && isLocal) {
+      this.broadcastAction({ type: 'SUMMON_MINION', card: playedCard, playerKey, minionId });
     }
 
     this.updateUI();
+    this.showSummonEffect(minionId, playerKey);
+    if (opponent.hp <= 0) this.handleGameOver(player);
+    else if (player.hp <= 0) this.handleGameOver(opponent);
+  }
 
+  showSummonEffect(minionId, playerKey) {
+    const token = document.querySelector(`[data-minion-id="${minionId}"]`);
+    if (!token) return;
+    token.classList.add('minion-summoning');
+    token.dataset.summoningPlayer = playerKey;
+    setTimeout(() => token.classList.remove('minion-summoning'), 850);
+  }
+
+  getOtherPlayerKey(playerKey) {
+    return playerKey === 'p1' ? 'p2' : 'p1';
+  }
+
+  handleMinionLaneClick(event, lane) {
+    const token = event.target.closest('.minion-token');
+    if (!token) return;
+    this.handleMinionClick(token.dataset.playerKey, token.dataset.minionId);
+  }
+
+  handleMinionClick(playerKey, minionId) {
+    if (this.isResolvingCombat || (this.mode === 'bot' && this.isBotThinking)) return;
+    const minion = this[playerKey]?.board.find((unit) => unit.id === minionId);
+    if (!minion) return;
+
+    if (this.selectedAttacker && this.selectedAttacker.playerKey === this.turn && playerKey !== this.turn) {
+      this.attackWithMinion(this.turn, this.selectedAttacker.minionId, {
+        type: 'minion', targetPlayerKey: playerKey, targetMinionId: minionId
+      });
+      return;
+    }
+
+    if (playerKey !== this.turn || !minion.canAttack || this.gameOver) return;
+    this.selectedAttacker = { playerKey, minionId };
+    this.updateUI();
+    this.addLog(`เลือก ${minion.card.name} แล้ว — แตะมินเนียนศัตรูหรือฮีโร่เพื่อโจมตี`);
+  }
+
+  handleHeroTarget(position) {
+    if (!this.selectedAttacker) return;
+    const targetPlayerKey = position === 'bottom' ? this.getMyPlayerKey() : this.getOpponentPlayerKey();
+    if (targetPlayerKey === this.selectedAttacker.playerKey) return;
+    this.attackWithMinion(this.selectedAttacker.playerKey, this.selectedAttacker.minionId, {
+      type: 'hero', targetPlayerKey
+    });
+  }
+
+  handleMinionDragStart(event) {
+    const token = event.target.closest('.minion-token');
+    if (!token || !event.dataTransfer) return;
+    event.dataTransfer.setData('application/x-ashigame-minion', JSON.stringify({
+      playerKey: token.dataset.playerKey,
+      minionId: token.dataset.minionId
+    }));
+    event.dataTransfer.effectAllowed = 'move';
+  }
+
+  readDraggedMinion(event) {
+    if (!event.dataTransfer) return null;
+    const payload = event.dataTransfer.getData('application/x-ashigame-minion');
+    if (!payload) return null;
+    try { return JSON.parse(payload); } catch (_error) { return null; }
+  }
+
+  handleLaneDrop(event, lane) {
+    event.preventDefault();
+    const playerKey = lane.dataset.playerKey;
+    const draggedMinion = this.readDraggedMinion(event);
+    if (draggedMinion) {
+      this.attackWithMinion(draggedMinion.playerKey, draggedMinion.minionId, {
+        type: 'minion', targetPlayerKey: playerKey,
+        targetMinionId: event.target.closest('.minion-token')?.dataset.minionId || null
+      });
+      return;
+    }
+
+    if (playerKey !== this.turn) return;
+    const cardId = event.dataTransfer?.getData('application/x-ashigame-card');
+    if (!cardId) return;
+    const card = this[playerKey].hand.find((held) => String(held.id) === cardId);
+    if (card) this.summonMinion(card, playerKey);
+  }
+
+  attackWithMinion(playerKey, minionId, target, isLocal = true) {
+    if (this.gameOver || this.isResolvingCombat || !target || this.turn !== playerKey) return;
+    if (this.isMultiplayer && isLocal && playerKey !== this.getMyPlayerKey()) return;
+
+    const attacker = this[playerKey]?.board.find((unit) => unit.id === minionId);
+    const defenderKey = this.getOtherPlayerKey(playerKey);
+    const defender = this[defenderKey];
+    if (!attacker || !attacker.canAttack) return;
+
+    const taunts = defender.board.filter((unit) => unit.taunt);
+    if (target.type === 'hero' && taunts.length > 0) {
+      this.addLog(`🛡️ ต้องโจมตีมินเนียนยั่วยุของ ${defender.name} ก่อน`);
+      this.selectedAttacker = null;
+      this.updateUI();
+      return;
+    }
+
+    const targetMinion = target.type === 'minion'
+      ? defender.board.find((unit) => unit.id === target.targetMinionId)
+      : null;
+    if (target.type === 'minion' && (!targetMinion || target.targetPlayerKey !== defenderKey)) return;
+    if (target.type === 'minion' && taunts.length && !targetMinion.taunt) {
+      this.addLog(`🛡️ ต้องโจมตีมินเนียนยั่วยุก่อน`);
+      return;
+    }
+    if (target.type === 'hero' && target.targetPlayerKey !== defenderKey) return;
+
+    attacker.canAttack = false;
+    this.isResolvingCombat = true;
+    this.selectedAttacker = null;
+    this.animateMinionAttack(playerKey, minionId, target);
+    sfx.play('attack');
     if (this.isMultiplayer && isLocal) {
       this.broadcastAction({
-        type: 'PLAY_CARD',
-        card: card,
-        choice: choice,
-        playerKey: playerKey
+        type: 'ATTACK_MINION', playerKey, minionId,
+        targetType: target.type,
+        targetPlayerKey: target.targetPlayerKey,
+        targetMinionId: target.targetMinionId || null
       });
     }
 
-    if (opponent.hp <= 0) {
-      this.handleGameOver(player);
+    const attackPower = attacker.atk;
+    const retaliation = targetMinion ? targetMinion.atk : 0;
+    const generation = this.combatGeneration;
+    setTimeout(() => {
+      if (generation !== this.combatGeneration) return;
+      const currentAttacker = this[playerKey].board.find((unit) => unit.id === minionId);
+      const combatHits = [];
+      if (target.type === 'hero') {
+        this.dealDamage(defender, attackPower, attacker.card.name);
+      } else if (targetMinion) {
+        this.damageMinion(targetMinion, attackPower, attacker.card.name);
+        combatHits.push({ minionId: targetMinion.id, amount: attackPower });
+        if (currentAttacker && retaliation > 0) {
+          this.damageMinion(currentAttacker, retaliation, targetMinion.card.name);
+          combatHits.push({ minionId: currentAttacker.id, amount: retaliation });
+        }
+      }
+
+      this.removeDefeatedMinions(this.p1);
+      this.removeDefeatedMinions(this.p2);
+      this.updateUI();
+      combatHits.forEach((hit) => this.showMinionImpact(hit.minionId, hit.amount));
+      this.showTargetImpact(target);
+      this.isResolvingCombat = false;
+      if (defender.hp <= 0) this.handleGameOver(this[playerKey]);
+      else if (this[playerKey].hp <= 0) this.handleGameOver(defender);
+    }, 480);
+  }
+
+  animateMinionAttack(playerKey, minionId, target) {
+    const attacker = document.querySelector(`[data-minion-id="${minionId}"]`);
+    if (attacker) {
+      attacker.classList.add(playerKey === this.getMyPlayerKey() ? 'attack-up' : 'attack-down');
+      setTimeout(() => attacker.classList.remove('attack-up', 'attack-down'), 520);
     }
+  }
+
+  damageMinion(minion, amount, sourceName) {
+    minion.health -= amount;
+    this.addLog(`💥 ${sourceName} สร้างความเสียหาย ${amount} ให้ ${minion.card.name} (${Math.max(0, minion.health)} HP)`,'damage');
+  }
+
+  showMinionImpact(minionId, amount) {
+    const token = document.querySelector(`[data-minion-id="${minionId}"]`);
+    if (!token) return;
+    const float = document.createElement('span');
+    float.className = 'minion-damage-pop';
+    float.textContent = `-${amount}`;
+    token.appendChild(float);
+    token.classList.add('battle-hit');
+    setTimeout(() => {
+      float.remove();
+      token.classList.remove('battle-hit');
+    }, 850);
+  }
+
+  showTargetImpact(target) {
+    const targetEl = target.type === 'hero'
+      ? (target.targetPlayerKey === this.getMyPlayerKey() ? this.p1HeroWrap : this.p2HeroWrap)
+      : document.querySelector(`[data-minion-id="${target.targetMinionId}"]`);
+    if (!targetEl) return;
+    targetEl.classList.add('battle-hit');
+    setTimeout(() => targetEl.classList.remove('battle-hit'), 500);
+  }
+
+  removeDefeatedMinions(player) {
+    player.board = player.board.filter((minion) => {
+      if (minion.health > 0) return true;
+      player.discard.push(minion.card);
+      this.addLog(`💀 ${minion.card.name} พ่ายแพ้และถูกส่งไปสุสาน`);
+      return false;
+    });
   }
 
   showFloatingText(player, text, type = 'dmg') {
@@ -1244,7 +1492,7 @@ class MemeGame {
 
   playBotTurn() {
     this.isBotThinking = true;
-    this.addLog(`🤖 บ็อตกำลังครุ่นคิดแผนการกวน...`);
+    this.addLog(`🤖 บ็อตกำลังวางแผนลงมินเนียนและเลือกเป้าหมาย...`);
 
     const botStep = () => {
       if (this.gameOver || this.turn !== 'p2') {
@@ -1252,46 +1500,44 @@ class MemeGame {
         return;
       }
 
-      // Check affordable cards
-      const affordableCards = this.p2.hand.filter(c => c.cost <= this.p2.energy);
+      const affordableCards = this.p2.hand
+        .filter((card) => card.cost <= this.p2.energy)
+        .sort((a, b) => (b.atk + b.def + b.cost) - (a.atk + a.def + a.cost));
 
-      if (affordableCards.length > 0) {
-        // AI Decision
-        let chosenCard = null;
-        let choice = 'attack';
-
-        // If HP is low (< 12), prioritize Defense/Heal cards
-        if (this.p2.hp <= 12) {
-          const tankCards = affordableCards.filter(c => c.category === 'Tank' || c.category === 'Support');
-          if (tankCards.length > 0) {
-            chosenCard = tankCards[0];
-            choice = 'guard';
-          }
-        }
-
-        // If not defending, pick highest ATK or highest Cost card to Attack
-        if (!chosenCard) {
-          affordableCards.sort((a, b) => b.atk - a.atk);
-          chosenCard = affordableCards[0];
-          choice = 'attack';
-        }
-
-        this.addLog(`🤖 บ็อตตัดสินใจเล่นการ์ด: "${chosenCard.name}" [${choice === 'attack' ? '⚔️ โจมตี' : '🛡️ ป้องกัน'}]`);
-        this.executeCardAction({ card: chosenCard, playerKey: 'p2' }, choice);
-
-        // Continue playing if still has energy and playable cards
-        setTimeout(botStep, 1000);
-      } else {
-        // End bot turn
-        setTimeout(() => {
-          this.isBotThinking = false;
-          this.addLog(`🤖 บ็อตจบรอบการเล่น`);
-          this.endCurrentTurn();
-        }, 800);
+      if (affordableCards.length && this.p2.board.length < 7) {
+        const chosenCard = affordableCards[0];
+        this.addLog(`🤖 บ็อตอัญเชิญ "${chosenCard.name}"`);
+        this.summonMinion(chosenCard, 'p2', false);
+        setTimeout(botStep, 720);
+        return;
       }
+
+      const readyMinion = this.p2.board.find((minion) => minion.canAttack);
+      if (readyMinion) {
+        const enemyTaunts = this.p1.board.filter((minion) => minion.taunt);
+        const enemyBoard = enemyTaunts.length ? enemyTaunts : this.p1.board;
+        const profitableTrade = enemyBoard
+          .filter((minion) => readyMinion.atk >= minion.health)
+          .sort((a, b) => a.atk - b.atk)[0];
+
+        if (profitableTrade || enemyTaunts.length) {
+          const target = profitableTrade || [...enemyTaunts].sort((a, b) => a.health - b.health)[0];
+          this.attackWithMinion('p2', readyMinion.id, {
+            type: 'minion', targetPlayerKey: 'p1', targetMinionId: target.id
+          }, false);
+        } else {
+          this.attackWithMinion('p2', readyMinion.id, { type: 'hero', targetPlayerKey: 'p1' }, false);
+        }
+        setTimeout(botStep, 760);
+        return;
+      }
+
+      this.isBotThinking = false;
+      this.addLog(`🤖 บ็อตจบรอบการเล่น`);
+      this.endCurrentTurn();
     };
 
-    setTimeout(botStep, 1000);
+    setTimeout(botStep, 700);
   }
 
   handleGameOver(winner) {
@@ -1414,6 +1660,35 @@ class MemeGame {
     // Top: Opponent Hand (Card Backs - Completely Hidden in Multiplayer & Bot Mode!)
     const isOpponentHidden = this.isMultiplayer || (this.mode === 'bot');
     this.renderHand(oppPlayer, this.p2HandZone, oppKey, isOpponentHidden);
+
+    this.p1BoardZone.dataset.playerKey = myKey;
+    this.p2BoardZone.dataset.playerKey = oppKey;
+    this.renderMinions(myPlayer, this.p1BoardZone, myKey);
+    this.renderMinions(oppPlayer, this.p2BoardZone, oppKey);
+    document.getElementById('p1MinionCount').innerText = `${myPlayer.board.length}/7`;
+    document.getElementById('p2MinionCount').innerText = `${oppPlayer.board.length}/7`;
+    if (this.selectedAttacker) {
+      const unit = this[this.selectedAttacker.playerKey].board.find((entry) => entry.id === this.selectedAttacker.minionId);
+      const targetBoard = this.selectedAttacker.playerKey === myKey ? this.p2BoardZone : this.p1BoardZone;
+      const targetHero = this.selectedAttacker.playerKey === myKey ? this.p2HeroWrap : this.p1HeroWrap;
+      const enemyTokens = [...targetBoard.querySelectorAll('.minion-token')];
+      const tauntTokens = enemyTokens.filter((token) => token.classList.contains('has-taunt'));
+      const validTokens = tauntTokens.length ? tauntTokens : enemyTokens;
+      validTokens.forEach((token) => token.classList.add('valid-target'));
+      this.p1HeroWrap.classList.toggle('valid-target', tauntTokens.length === 0 && targetHero === this.p1HeroWrap);
+      this.p2HeroWrap.classList.toggle('valid-target', tauntTokens.length === 0 && targetHero === this.p2HeroWrap);
+      this.battleTickerMsg.innerText = unit
+        ? `เลือก ${unit.card.name} แล้ว — แตะมินเนียนศัตรูหรือฮีโร่เพื่อโจมตี`
+        : 'เลือกมินเนียนพร้อมโจมตี แล้วแตะเป้าหมาย';
+      this.battleTickerMsg.classList.add('targeting');
+    } else {
+      this.p1HeroWrap.classList.remove('valid-target');
+      this.p2HeroWrap.classList.remove('valid-target');
+      this.battleTickerMsg.innerText = this.turn === myKey
+        ? 'เล่นการ์ดเพื่ออัญเชิญ แล้วเลือกมินเนียนเพื่อโจมตี'
+        : `${oppPlayer.name} กำลังเล่นเทิร์น`;
+      this.battleTickerMsg.classList.remove('targeting');
+    }
   }
 
   renderHand(player, container, playerKey, isCardBack = false) {
@@ -1434,7 +1709,8 @@ class MemeGame {
     player.hand.forEach((card, index) => {
       const cardEl = document.createElement('div');
       cardEl.className = 'card-item';
-      if (!isMyTurn || player.energy < card.cost) {
+      cardEl.draggable = isMyTurn && player.energy >= card.cost && player.board.length < 7;
+      if (!isMyTurn || player.energy < card.cost || player.board.length >= 7) {
         cardEl.classList.add('unplayable');
       }
       cardEl.dataset.cat = card.category;
@@ -1455,7 +1731,7 @@ class MemeGame {
         <div class="card-mana-gem">${card.cost}</div>
         <div class="card-class-seal">${card.category}</div>
         <div class="card-art-frame">
-          <img src="${card.image}" alt="${card.name}" loading="lazy" />
+          <img src="${card.image}" alt="${card.name}" loading="lazy" draggable="false" />
         </div>
         <div class="card-banner-ribbon">
           <div class="card-title-text">${card.name}</div>
@@ -1465,14 +1741,59 @@ class MemeGame {
           <div class="skill-description">${card.skill.desc}</div>
         </div>
         <div class="stat-crest attack-crest" title="พลังโจมตี (ATK)">${card.atk}</div>
-        <div class="stat-crest defense-crest" title="ค่าป้องกัน (DEF)">${card.def}</div>
+        <div class="stat-crest defense-crest" title="พลังชีวิต (HP)">${card.def}</div>
       `;
 
       cardEl.addEventListener('click', () => {
+        if (this.suppressNextCardClick) return;
         this.openCardAction(card, playerKey);
       });
 
+      cardEl.addEventListener('dragstart', (event) => {
+        if (!cardEl.draggable || !event.dataTransfer) {
+          event.preventDefault();
+          return;
+        }
+        this.suppressNextCardClick = true;
+        event.dataTransfer.setData('application/x-ashigame-card', String(card.id));
+        event.dataTransfer.effectAllowed = 'move';
+        cardEl.classList.add('is-dragging');
+      });
+      cardEl.addEventListener('dragend', () => {
+        cardEl.classList.remove('is-dragging');
+        setTimeout(() => { this.suppressNextCardClick = false; }, 120);
+      });
+
       container.appendChild(cardEl);
+    });
+  }
+
+  renderMinions(player, container, playerKey) {
+    container.innerHTML = '';
+    player.board.forEach((minion) => {
+      const token = document.createElement('button');
+      token.type = 'button';
+      token.className = 'minion-token';
+      token.dataset.minionId = minion.id;
+      token.dataset.playerKey = playerKey;
+      token.draggable = minion.canAttack && this.turn === playerKey;
+      if (minion.canAttack && this.turn === playerKey) token.classList.add('can-attack');
+      if (minion.taunt) token.classList.add('has-taunt');
+      if (this.selectedAttacker?.minionId === minion.id && this.selectedAttacker?.playerKey === playerKey) {
+        token.classList.add('is-selected');
+      }
+
+      token.innerHTML = `
+        <span class="minion-aura"></span>
+        <span class="minion-art"><img src="${minion.card.image}" alt="" draggable="false" /></span>
+        ${minion.taunt ? '<span class="minion-taunt">TAUNT</span>' : ''}
+        <span class="minion-name">${minion.card.name}</span>
+        <span class="minion-stat minion-atk">${minion.atk}</span>
+        <span class="minion-stat minion-health">${minion.health}</span>
+        ${minion.summoningSick ? '<span class="sleeping-mark" title="เทิร์นนี้ยังโจมตีไม่ได้">☾</span>' : ''}
+      `;
+      token.title = `${minion.card.name} — ATK ${minion.atk} / HP ${minion.health}${minion.taunt ? ' / Taunt' : ''}`;
+      container.appendChild(token);
     });
   }
 
@@ -1542,7 +1863,7 @@ class MemeGame {
           <div style="font-size: 8.5px; font-style: italic; color: #8c6209; margin-top: 4px;">"${card.quote}"</div>
         </div>
         <div class="stat-crest attack-crest" title="พลังโจมตี (ATK)">${card.atk}</div>
-        <div class="stat-crest defense-crest" title="ค่าป้องกัน (DEF)">${card.def}</div>
+        <div class="stat-crest defense-crest" title="พลังชีวิต (HP)">${card.def}</div>
       `;
       grid.appendChild(cardEl);
     });
@@ -1587,7 +1908,7 @@ class MemeGame {
           </div>
           <div class="print-footer">
             <span class="print-atk">⚔️ ATK ${c.atk}</span>
-            <span class="print-def">🛡️ DEF ${c.def}</span>
+            <span class="print-def">❤️ HP ${c.def}</span>
           </div>
         `;
         sheet.appendChild(cardBox);

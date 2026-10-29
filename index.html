@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meme Duel: สงครามการ์ดเพื่อนแท้ (Tabletop TCG)</title>
+  <title>Meme Duel: สงครามการ์ดเพื่อนแท้ (Minion Battle Arena)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
       </div>
       <div class="logo-text">
         <h1>MEME DUEL: สงครามการ์ดเพื่อนแท้</h1>
-        <span>Tabletop TCG Edition • กติกาง่าย เล่นสนุกกับเพื่อน</span>
+        <span>MINION BATTLE ARENA • อัญเชิญ ต่อสู้ และสร้างคอมโบ</span>
       </div>
     </div>
 
@@ -85,7 +85,7 @@
 
         <!-- Opponent Hero Bar (Top) -->
         <section id="p2Panel" class="hero-zone">
-          <div class="hero-frame-wrap" id="p2HeroWrap">
+          <div class="hero-frame-wrap" id="p2HeroWrap" role="button" tabindex="0" aria-label="ฮีโร่ฝ่ายตรงข้าม">
             <div class="hero-portrait-socket">
               <div class="hero-avatar">
                 <span class="hero-avatar-icon">🤖</span>
@@ -124,16 +124,25 @@
             <span class="slot-label">สุสาน (Grave)</span>
           </div>
 
-          <!-- Center: Live Clash Stage & Battle Ticker -->
-          <div class="duel-clash-stage" id="duelStage">
-            <div class="stage-combat-live">
-              <div id="battleTickerMsg" class="battle-ticker-msg">
-                คลิกที่การ์ดในมือเพื่อเลือก โจมตี หรือ ป้องกัน
-              </div>
+          <!-- Persistent minion lanes and targetable combat stage -->
+          <div class="duel-clash-stage" id="duelStage" aria-label="สนามต่อสู้">
+            <section class="battlefield-lane opponent-lane" aria-label="มินเนียนฝ่ายตรงข้าม">
+              <div class="lane-caption"><span>⚔️ สนามฝ่ายตรงข้าม</span><span id="p2MinionCount">0/7</span></div>
+              <div id="p2BoardZone" class="minion-row" data-lane="opponent"></div>
+            </section>
+
+            <div class="battlefield-midline">
+              <span class="lane-divider-rune">✦</span>
+              <div id="battleTickerMsg" class="battle-ticker-msg">ลากการ์ดลงสนาม หรือเลือกมินเนียนแล้วแตะเป้าหมาย</div>
               <button id="endTurnBtn" class="turn-crown-btn">
-                <span>จบเทิร์น (End Turn)</span>
+                <span>จบเทิร์น<br><small>END TURN</small></span>
               </button>
             </div>
+
+            <section class="battlefield-lane friendly-lane" aria-label="มินเนียนของคุณ">
+              <div class="lane-caption"><span>🛡️ สนามของคุณ</span><span id="p1MinionCount">0/7</span></div>
+              <div id="p1BoardZone" class="minion-row" data-lane="friendly"></div>
+            </section>
           </div>
 
           <!-- Right: 3D Draw Deck Stack -->
@@ -151,7 +160,7 @@
 
         <!-- Player Hero Bar & Fanned Hand (Bottom) -->
         <section id="p1Panel" class="hero-zone">
-          <div class="hero-frame-wrap active-turn" id="p1HeroWrap">
+          <div class="hero-frame-wrap active-turn" id="p1HeroWrap" role="button" tabindex="0" aria-label="ฮีโร่ของคุณ">
             <div class="hero-portrait-socket">
               <div class="hero-avatar">
                 <span class="hero-avatar-icon">😎</span>
@@ -179,8 +188,7 @@
         <!-- Player Fanned Hand Zone -->
         <div id="p1HandZone" class="fanned-hand-zone"></div>
 
-        <!-- Hidden Combat Log for record keeper & tests -->
-        <div id="combatLog" style="display: none;"></div>
+        <aside id="combatLog" class="combat-log" aria-label="บันทึกการต่อสู้" aria-live="polite"></aside>
 
       </div>
     </div>
@@ -247,24 +255,20 @@
 
       <div class="detail-stats-bar">
         <span style="color: #f87171; font-weight: 800; font-size: 14px;">พลังโจมตี: <span id="actionModalAtk"></span></span>
-        <span style="color: #4ade80; font-weight: 800; font-size: 14px;">ค่าป้องกัน: <span id="actionModalDef"></span></span>
+        <span style="color: #4ade80; font-weight: 800; font-size: 14px;">พลังชีวิต: <span id="actionModalDef"></span></span>
       </div>
 
       <div style="background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; border-left: 3px solid var(--gold-primary);">
-        <div style="font-size: 13px; color: var(--gold-highlight); font-weight: 800; margin-bottom: 3px;">สกิลพิเศษ</div>
+        <div style="font-size: 13px; color: var(--gold-highlight); font-weight: 800; margin-bottom: 3px;">เอฟเฟกต์เมื่ออัญเชิญ</div>
         <div id="actionModalSkill" style="font-size: 13px; line-height: 1.4; color: #f1f5f9;"></div>
       </div>
 
       <div id="actionModalQuote" style="font-size: 12px; font-style: italic; color: #fde047; text-align: center;"></div>
 
       <div class="action-buttons-wrap">
-        <button id="actAttackBtn" class="act-btn attack">
-          <span>โจมตี (Attack)</span>
-          <span style="font-size: 11px; font-weight: normal; opacity: 0.9;">ทำดาเมจ + ปล่อยสกิล</span>
-        </button>
-        <button id="actGuardBtn" class="act-btn guard">
-          <span>ป้องกัน (Guard)</span>
-          <span style="font-size: 11px; font-weight: normal; opacity: 0.9;">เพิ่มเกราะ + บล็อก</span>
+        <button id="actSummonBtn" class="act-btn attack">
+          <span>อัญเชิญลงสนาม</span>
+          <span style="font-size: 11px; font-weight: normal; opacity: 0.9;">มินเนียนจะเริ่มโจมตีได้ในเทิร์นถัดไป</span>
         </button>
         <button id="actCancelBtn" class="act-btn cancel">ยกเลิก</button>
       </div>
@@ -285,25 +289,25 @@
         </div>
 
         <div class="rule-box">
-          <h3>2. พลังงาน (มานา) และการจั่วการ์ด</h3>
+          <h3>2. มานาและการจั่วการ์ด</h3>
           <p>
-            - ในเทิร์นแรก เริ่มต้นด้วย <strong>2 มานา</strong><br>
-            - ทุกครั้งที่เริ่มเทิร์นใหม่ มานาจะเพิ่มขึ้นทีละ 1 แต้ม (สูงสุด 6 แต้ม)<br>
+            - เริ่มต้นด้วย <strong>2 มานา</strong> และเพิ่มสูงสุด 6 แต้มเมื่อเริ่มเทิร์นของผู้เล่น 1<br>
             - เริ่มต้นเทิร์น ผู้เล่นจะจั่วการ์ดขึ้นมือ 1 ใบอัตโนมัติ (การ์ดบนมือถือได้สูงสุด 7 ใบ)
           </p>
         </div>
 
         <div class="rule-box">
-          <h3>3. การเล่นการ์ด: เลือกระหว่าง โจมตี หรือ ป้องกัน</h3>
+          <h3>3. อัญเชิญมินเนียนและต่อสู้</h3>
           <p>
-            เมื่อคลิกที่การ์ดในมือ จะสามารถเลือกได้ 2 ทาง:<br>
-            - <strong>[ โจมตี (Attack) ]</strong>: ใช้พลังโจมตี (ATK) ของการ์ดฟาดใส่คู่ต่อสู้ (ถ้ามีเกราะ เกราะจะรับแทนก่อน) พร้อมเปิดใช้เอฟเฟกต์สกิลพิเศษของการ์ด!<br>
-            - <strong>[ ป้องกัน (Guard) ]</strong>: นำค่า DEF ของการ์ดมาบวกเพิ่มเป็น <strong>เกราะ (Shield)</strong> ให้ตัวเองเพื่อป้องกันการโจมตีในเทิร์นหน้า
+            ลากการ์ดจากมือมาวางบนสนาม หรือแตะการ์ดเพื่อดูรายละเอียดแล้วกดอัญเชิญ มินเนียนที่เพิ่งลงสนามยังโจมตีไม่ได้จนกว่าจะถึงเทิร์นถัดไป<br>
+            เลือกมินเนียนที่พร้อมโจมตีแล้วแตะมินเนียนศัตรูหรือฮีโร่เพื่อบุก มินเนียนทั้งสองฝ่ายแลกความเสียหายตาม ATK พร้อมกัน มินเนียนสายแทงค์มี <strong>ยั่วยุ (Taunt)</strong> จึงต้องถูกโจมตีก่อน
           </p>
         </div>
 
         <div class="rule-box">
-          <h3>4. สายของการ์ดทั้ง 21 ใบ</h3>
+          <h3>4. ค่าสถานะและสนาม</h3>
+          <p>มินเนียนมี ATK และ HP สูงสุด 7 ตัวต่อฝ่าย มินเนียนที่ HP เหลือ 0 จะไปสุสาน และการ์ดสายแทงค์มี Taunt บังคับให้ศัตรูโจมตีพวกมันก่อน</p>
+          <h3>5. สายของการ์ดทั้ง 21 ใบ</h3>
           <p>
             - <strong>สายแทงค์ (Tank)</strong>: เน้นเกราะหนา และฟื้นฟู HP<br>
             - <strong>สายไฟท์เตอร์ (Fighter)</strong>: พลังหมัดหนัก และเจาะเกราะ<br>
