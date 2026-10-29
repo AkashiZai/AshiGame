@@ -305,6 +305,28 @@ class MemeGame {
       });
     });
 
+    [this.rulesModal, this.gameOverModal, this.roomModal, this.cardActionModal].forEach(modal => {
+      if (!modal) return;
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          if (modal === this.cardActionModal) this.closeCardAction();
+          else modal.classList.remove('active');
+        }
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.closeCardAction();
+        this.rulesModal?.classList.remove('active');
+        this.roomModal?.classList.remove('active');
+        if (this.selectedAttacker) {
+          this.selectedAttacker = null;
+          this.updateUI();
+        }
+      }
+    });
+
     this.endTurnBtn.addEventListener('click', () => this.endCurrentTurn());
 
     // Navigation Tabs
@@ -344,6 +366,10 @@ class MemeGame {
     this.p2BoardZone.addEventListener('dragover', (event) => event.preventDefault());
     this.p1BoardZone.addEventListener('drop', (event) => this.handleLaneDrop(event, this.p1BoardZone));
     this.p2BoardZone.addEventListener('drop', (event) => this.handleLaneDrop(event, this.p2BoardZone));
+    if (this.duelStage) {
+      this.duelStage.addEventListener('dragover', (event) => event.preventDefault());
+      this.duelStage.addEventListener('drop', (event) => this.handleLaneDrop(event, this.p1BoardZone));
+    }
 
     this.p1HeroWrap = document.getElementById('p1HeroWrap');
     this.p2HeroWrap = document.getElementById('p2HeroWrap');
@@ -1008,27 +1034,16 @@ class MemeGame {
   }
 
   openCardAction(card, playerKey) {
-    if (this.gameOver || this.isBotThinking) return;
-    if (this.turn !== playerKey) {
-      this.addLog(`⏳ ยังไม่ใช่เทิร์นของคุณ!`);
-      return;
-    }
-
-    if (this.isMultiplayer && playerKey !== this.getMyPlayerKey()) {
-      return;
-    }
+    if (this.gameOver) return;
+    if (this.isMultiplayer && playerKey !== this.getMyPlayerKey()) return;
 
     const player = playerKey === 'p1' ? this.p1 : this.p2;
-    if (player.energy < card.cost) {
-      this.addLog(`❌ มานาไม่พอ! ต้องการ ${card.cost} แต้ม (คุณมี ${player.energy})`);
-      return;
-    }
-    if (player.board.length >= 7) {
-      this.addLog(`สนามของ ${player.name} เต็มแล้ว (สูงสุด 7 มินเนียน)`);
-      return;
-    }
+    const isMyTurn = this.turn === playerKey && !this.isBotThinking;
+    const hasMana = player.energy >= card.cost;
+    const hasSpace = player.board.length < 7;
+    const canSummon = isMyTurn && hasMana && hasSpace;
 
-    this.pendingCard = { card, playerKey };
+    this.pendingCard = canSummon ? { card, playerKey } : null;
 
     // Populate modal preview
     document.getElementById('actionModalImg').src = card.image;
@@ -1039,6 +1054,20 @@ class MemeGame {
     document.getElementById('actionModalDef').innerText = card.def;
     document.getElementById('actionModalSkill').innerText = `${card.skill.name}: ${card.skill.desc}`;
     document.getElementById('actionModalQuote').innerText = `"${card.quote}"`;
+
+    const summonBtn = document.getElementById('actSummonBtn');
+    if (summonBtn) {
+      summonBtn.disabled = !canSummon;
+      if (canSummon) {
+        summonBtn.innerHTML = `<span>⚡ อัญเชิญลงสนาม (${card.cost} มานา)</span><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">เริ่มโจมตีได้ในเทิร์นถัดไป</span>`;
+      } else if (!isMyTurn) {
+        summonBtn.innerHTML = `<span>⏳ รอเทิร์นของคุณ</span>`;
+      } else if (!hasMana) {
+        summonBtn.innerHTML = `<span>❌ มานาไม่พอ (ต้องการ ${card.cost} / มี ${player.energy})</span>`;
+      } else {
+        summonBtn.innerHTML = `<span>❌ สนามเต็มแล้ว (7/7)</span>`;
+      }
+    }
 
     this.cardActionModal.classList.add('active');
   }
@@ -1127,6 +1156,12 @@ class MemeGame {
       return;
     }
 
+    if (this.selectedAttacker && this.selectedAttacker.playerKey === playerKey && this.selectedAttacker.minionId === minionId) {
+      this.selectedAttacker = null;
+      this.updateUI();
+      return;
+    }
+
     if (playerKey !== this.turn || !minion.canAttack || this.gameOver) return;
     this.selectedAttacker = { playerKey, minionId };
     this.updateUI();
@@ -1161,6 +1196,7 @@ class MemeGame {
 
   handleLaneDrop(event, lane) {
     event.preventDefault();
+    event.stopPropagation();
     const playerKey = lane.dataset.playerKey;
     const draggedMinion = this.readDraggedMinion(event);
     if (draggedMinion) {
@@ -1171,11 +1207,11 @@ class MemeGame {
       return;
     }
 
-    if (playerKey !== this.turn) return;
     const cardId = event.dataTransfer?.getData('application/x-ashigame-card');
     if (!cardId) return;
-    const card = this[playerKey].hand.find((held) => String(held.id) === cardId);
-    if (card) this.summonMinion(card, playerKey);
+    const activeKey = this.turn;
+    const card = this[activeKey]?.hand.find((held) => String(held.id) === cardId);
+    if (card) this.summonMinion(card, activeKey);
   }
 
   attackWithMinion(playerKey, minionId, target, isLocal = true) {
@@ -1568,6 +1604,22 @@ class MemeGame {
     div.innerText = msg;
     this.combatLog.appendChild(div);
     this.combatLog.scrollTop = this.combatLog.scrollHeight;
+
+    if (this.battleTickerMsg && msg && !this.selectedAttacker) {
+      this.tickerFlashMsg = msg;
+      this.battleTickerMsg.innerText = msg;
+      clearTimeout(this.tickerTimeout);
+      this.tickerTimeout = setTimeout(() => {
+        this.tickerFlashMsg = null;
+        if (!this.selectedAttacker && this.battleTickerMsg) {
+          const myKey = this.getMyPlayerKey();
+          const oppKey = this.getOpponentPlayerKey();
+          this.battleTickerMsg.innerText = this.turn === myKey
+            ? 'แตะการ์ดบนมือเพื่อดูสกิล/อัญเชิญ หรือลากการ์ดลงสนาม'
+            : `${this[oppKey].name} กำลังเล่นเทิร์น...`;
+        }
+      }, 2400);
+    }
   }
 
   updateUI() {
@@ -1684,9 +1736,9 @@ class MemeGame {
     } else {
       this.p1HeroWrap.classList.remove('valid-target');
       this.p2HeroWrap.classList.remove('valid-target');
-      this.battleTickerMsg.innerText = this.turn === myKey
-        ? 'เล่นการ์ดเพื่ออัญเชิญ แล้วเลือกมินเนียนเพื่อโจมตี'
-        : `${oppPlayer.name} กำลังเล่นเทิร์น`;
+      this.battleTickerMsg.innerText = this.tickerFlashMsg || (this.turn === myKey
+        ? 'แตะการ์ดบนมือเพื่อดูสกิล/อัญเชิญ หรือลากการ์ดลงสนาม'
+        : `${oppPlayer.name} กำลังเล่นเทิร์น...`);
       this.battleTickerMsg.classList.remove('targeting');
     }
   }
@@ -1706,6 +1758,7 @@ class MemeGame {
 
     const isMyTurn = (this.turn === playerKey);
     const totalCards = player.hand.length;
+    const stepX = Math.min(82, Math.floor(560 / Math.max(totalCards, 1)));
     player.hand.forEach((card, index) => {
       const cardEl = document.createElement('div');
       cardEl.className = 'card-item';
@@ -1715,12 +1768,12 @@ class MemeGame {
       }
       cardEl.dataset.cat = card.category;
 
-      // Arc Fan Geometry with preserved CSS variables
+      // Gentle Arc Fan Geometry with clear horizontal separation
       const mid = (totalCards - 1) / 2;
       const offset = index - mid;
-      const rotateDeg = offset * 4;
-      const translateY = Math.abs(offset) * 6;
-      const translateX = offset * 48;
+      const rotateDeg = offset * 2.2;
+      const translateY = Math.abs(offset) * 3;
+      const translateX = offset * stepX;
 
       cardEl.style.setProperty('--card-tx', `${translateX}px`);
       cardEl.style.setProperty('--card-ty', `${translateY}px`);
@@ -1758,9 +1811,11 @@ class MemeGame {
         event.dataTransfer.setData('application/x-ashigame-card', String(card.id));
         event.dataTransfer.effectAllowed = 'move';
         cardEl.classList.add('is-dragging');
+        this.duelStage?.classList.add('dragging-card');
       });
       cardEl.addEventListener('dragend', () => {
         cardEl.classList.remove('is-dragging');
+        this.duelStage?.classList.remove('dragging-card');
         setTimeout(() => { this.suppressNextCardClick = false; }, 120);
       });
 

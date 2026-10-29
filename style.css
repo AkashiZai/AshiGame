@@ -42,8 +42,8 @@
 
   /* Layout */
   --font-family: 'Kanit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --card-width: 122px;
-  --card-height: 174px;
+  --card-width: clamp(104px, 14.5vh, 124px);
+  --card-height: clamp(148px, 20.5vh, 174px);
 }
 
 * {
@@ -423,28 +423,29 @@ main {
 }
 
 #p2Panel {
-  min-height: 84px;
+  min-height: 76px;
   flex-shrink: 0;
-  align-items: flex-end;
-  padding-bottom: 2px;
+  align-items: center;
+  padding: 2px 0;
 }
 
 #p1Panel {
-  min-height: 78px;
+  min-height: 76px;
   flex-shrink: 0;
+  align-items: center;
   margin-top: 0;
 }
 
-/* Hero Frame Socket (Contains Hero Portrait + Circular Hero Power) */
+/* Hero Frame Socket (Centered Symmetrical Hero Archway) */
 .hero-frame-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 3px 64px 3px 8px; /* Space on right holds Hero Power token */
-  background: radial-gradient(circle at 40% 50%, #4a2818 0%, #26140b 70%, #170b05 100%);
+  padding: 4px 10px;
+  background: radial-gradient(circle at 50% 50%, #4a2818 0%, #26140b 70%, #170b05 100%);
   border: 3px solid #997b53;
-  border-radius: 44px 44px 14px 14px;
+  border-radius: 44px 44px 16px 16px;
   box-shadow:
     inset 0 2px 3px rgba(255, 255, 255, 0.35),
     inset 0 -4px 8px rgba(0, 0, 0, 0.9),
@@ -481,41 +482,8 @@ main {
     inset 0 0 14px rgba(255, 240, 153, 0.4);
 }
 
-/* Circular 2-Mana Hero Power Token (Right of Hero Portrait) */
 .hero-frame-wrap::after {
-  content: '2';
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background-color: #1e293b;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='hpGlow' cx='45%25' cy='45%25' r='55%25'%3E%3Cstop offset='0%25' stop-color='%23fde047'/%3E%3Cstop offset='45%25' stop-color='%23ea580c'/%3E%3Cstop offset='90%25' stop-color='%237c2d12'/%3E%3Cstop offset='100%25' stop-color='%231c0a04'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='26' fill='url(%23hpGlow)' stroke='%23eab308' stroke-width='4.5'/%3E%3Cpath d='M32,14 Q38,26 44,28 Q36,36 34,46 Q28,38 24,38 Q24,28 32,14 Z' fill='%23fef08a'/%3E%3Cpolygon points='32,3 39,9 39,18 32,23 25,18 25,9' fill='%230284c7' stroke='%23bae6fd' stroke-width='1.5'/%3E%3C/svg%3E");
-  background-size: cover;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 1px;
-  font-size: 11.5px;
-  font-weight: 900;
-  color: #fff;
-  text-shadow:
-    -1.5px -1.5px 0 #000,
-     1.5px -1.5px 0 #000,
-    -1.5px  1.5px 0 #000,
-     1.5px  1.5px 0 #000;
-  box-shadow:
-    0 4px 10px rgba(0, 0, 0, 0.85),
-    0 0 0 2px #3b2816;
-}
-
-.hero-frame-wrap.active-turn::after {
-  box-shadow:
-    0 0 0 2.5px var(--neon-green-aura),
-    0 0 16px var(--neon-green-aura),
-    0 6px 12px rgba(0, 0, 0, 0.9);
+  display: none !important;
 }
 
 /* Arched Oval Hero Portrait Socket */
@@ -710,16 +678,17 @@ main {
 }
 
 /* --------------------------------------------------------------------------
-   OPPONENT HAND (TUCKED AT TOP EDGE - ZERO INTERFERENCE)
+   OPPONENT HAND (DOCKED BESIDE OPPONENT HERO - ZERO OVERLAP WITH HERO!)
    -------------------------------------------------------------------------- */
 .enemy-hand-strip {
   position: absolute;
-  top: 0px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  left: calc(50% - 66px);
+  transform: translate(-100%, -50%);
   display: flex;
-  justify-content: center;
-  height: 38px;
+  align-items: center;
+  justify-content: flex-end;
+  height: 40px;
   z-index: 20;
 }
 
@@ -735,8 +704,8 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 -3px;
-  transform: rotate(3deg);
+  margin: 0 -2px;
+  transform: rotate(-3deg);
   transition: transform 0.2s ease;
 }
 
@@ -848,6 +817,8 @@ main {
    -------------------------------------------------------------------------- */
 .duel-clash-stage {
   height: 100%;
+  max-height: 240px;
+  margin: auto 0;
   align-self: stretch;
   min-height: 0;
   display: flex;
@@ -861,6 +832,16 @@ main {
     radial-gradient(ellipse at center, rgba(255, 241, 204, .25), transparent 66%),
     linear-gradient(180deg, rgba(82, 54, 25, .12), rgba(75, 49, 24, .22));
   box-shadow: inset 0 0 20px rgba(77, 51, 25, .28);
+  transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.duel-clash-stage.dragging-card .friendly-lane .minion-row {
+  background: rgba(74, 222, 128, 0.14);
+  border: 2px dashed rgba(74, 222, 128, 0.85);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 0 18px rgba(74, 222, 128, 0.3),
+    0 0 16px rgba(74, 222, 128, 0.35);
 }
 
 .battlefield-lane {
@@ -1211,23 +1192,23 @@ main {
 }
 
 /* ==========================================================================
-   FANNED HAND AT BOTTOM (ANCHORED UNDER PLAYER HERO - ZERO OVERLAP)
+   FANNED HAND AT BOTTOM (ANCHORED UNDER PLAYER HERO - ZERO OVERLAP & ZERO CLIP)
    ========================================================================== */
 .fanned-hand-zone {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  height: 125px;
+  height: calc(var(--card-height) + 14px);
   flex-shrink: 0;
   position: relative;
-  margin-top: 0px;
-  padding-bottom: 0px;
+  margin-top: 2px;
+  padding-bottom: 4px;
   z-index: 60;
 }
 
 .fanned-hand-zone .card-item {
   position: absolute;
-  bottom: -22px;
+  bottom: 8px;
   transform-origin: center 130%;
   transform: translateX(var(--card-tx, 0px)) translateY(var(--card-ty, 0px)) rotate(var(--card-rot, 0deg));
   /* Neon Green Playable Border Glow */
@@ -1235,25 +1216,25 @@ main {
     0 0 0 2px var(--neon-green-aura),
     0 0 14px 2px rgba(74, 222, 128, 0.75),
     0 6px 14px rgba(0, 0, 0, 0.85);
-  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease, filter 0.22s ease;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .fanned-hand-zone .card-item.unplayable {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.85);
-  filter: brightness(0.82);
+  filter: brightness(0.84);
 }
 
 .fanned-hand-zone .card-item::after {
   content: '';
   position: absolute;
-  inset: 0 0 -40px 0;
+  inset: 0 0 -18px 0;
   pointer-events: auto;
   z-index: -1;
 }
 
 /* Hover Magnification: Lifts with Radiant Golden Aura */
 .fanned-hand-zone .card-item:hover {
-  transform: translateX(var(--card-tx, 0px)) translateY(-65px) rotate(0deg) scale(1.18) !important;
+  transform: translateX(var(--card-tx, 0px)) translateY(-34px) rotate(0deg) scale(1.16) !important;
   box-shadow:
     0 0 0 2.5px var(--neon-yellow-aura),
     0 0 24px 6px rgba(255, 230, 0, 0.95),
@@ -1336,10 +1317,17 @@ main {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
+.card-item[data-cat="Tank"] .card-class-seal { background: #1e3a8a; border-color: #60a5fa; color: #dbeafe; }
+.card-item[data-cat="Fighter"] .card-class-seal { background: #7f1d1d; border-color: #f87171; color: #fee2e2; }
+.card-item[data-cat="Assassin"] .card-class-seal { background: #4c1d95; border-color: #c084fc; color: #f3e8ff; }
+.card-item[data-cat="Chaos"] .card-class-seal { background: #7c2d12; border-color: #fb923c; color: #ffedd5; }
+.card-item[data-cat="Support"] .card-class-seal { background: #14532d; border-color: #4ade80; color: #dcfce7; }
+
 /* Oval Minion Art Frame */
 .card-art-frame {
   width: 90%;
-  height: 74px;
+  height: 44%;
+  min-height: 54px;
   margin: 4px auto 0 auto;
   border-radius: 50% / 46%;
   overflow: hidden;
@@ -1641,9 +1629,18 @@ main {
   box-shadow: 0 4px 0 #1c1917;
 }
 
-.act-btn:hover {
+.act-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   filter: brightness(1.1);
+}
+
+.act-btn:disabled {
+  background: linear-gradient(180deg, #334155 0%, #1e293b 100%) !important;
+  border-color: #64748b !important;
+  color: #94a3b8 !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  opacity: 0.85;
 }
 
 /* ==========================================================================
@@ -1962,10 +1959,10 @@ main {
     height: 70px;
   }
   .fanned-hand-zone {
-    height: 115px;
+    height: calc(var(--card-height) + 12px);
   }
   .fanned-hand-zone .card-item {
-    bottom: -18px;
+    bottom: 6px;
   }
 }
 
@@ -2025,11 +2022,9 @@ main {
     font-size: 13px;
     padding-top: 4px;
   }
-  .hero-frame-wrap::after {
-    width: 38px;
-    height: 38px;
-    right: 4px;
-    font-size: 10px;
+  .enemy-hand-strip {
+    left: calc(50% - 48px);
+    transform: translate(-100%, -50%) scale(0.8);
   }
   .center-battleground {
     grid-template-columns: 32px minmax(0, 1fr) 32px;
@@ -2053,10 +2048,10 @@ main {
     font-size: 10.5px;
   }
   .fanned-hand-zone {
-    height: 95px;
+    height: calc(var(--card-height) + 10px);
   }
   .fanned-hand-zone .card-item {
-    bottom: -14px;
+    bottom: 4px;
   }
   .card-mana-gem {
     width: 22px;
