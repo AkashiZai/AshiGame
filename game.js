@@ -1395,6 +1395,7 @@ class MemeGame {
       if (p2Wrap) p2Wrap.classList.remove('active-turn');
       this.endTurnBtn.disabled = false;
       this.endTurnBtn.classList.remove('disabled');
+      this.endTurnBtn.innerHTML = `<span>จบเทิร์น<br><small style="font-size:9.5px;letter-spacing:1px;opacity:0.9;">END TURN</small></span>`;
     } else {
       this.turnBanner.innerText = `⏳ เทิร์นของ ${oppPlayer.name}`;
       this.turnBanner.style.borderColor = 'var(--gold-dark)';
@@ -1403,6 +1404,7 @@ class MemeGame {
       if (p2Wrap) p2Wrap.classList.add('active-turn');
       this.endTurnBtn.disabled = true;
       this.endTurnBtn.classList.add('disabled');
+      this.endTurnBtn.innerHTML = `<span>เทิร์นศัตรู<br><small style="font-size:9.5px;letter-spacing:1px;opacity:0.85;">ENEMY TURN</small></span>`;
     }
 
     // Render Hands

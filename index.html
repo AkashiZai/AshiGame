@@ -45,36 +45,36 @@
     <div id="tab-arena" class="tab-content active">
       
       <!-- Top Control Bar -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap;">
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <label for="gameModeSelect" style="font-size: 13px; font-weight: 700; color: var(--gold-highlight);">โหมดเกม:</label>
-          <select id="gameModeSelect" class="select-input" style="background: #180f0a; border: 1.5px solid var(--gold-dark); color: #fff; padding: 6px 12px; border-radius: 6px; font-weight: 700;">
+      <div class="top-control-bar">
+        <div class="ctrl-group-left">
+          <label for="gameModeSelect">โหมดเกม:</label>
+          <select id="gameModeSelect" class="select-input">
             <option value="bot">ดวลกับ AI บ็อตเพื่อนยาก</option>
             <option value="multiplayer">🌐 เล่นออนไลน์ 2 เครื่อง (ห้องโค้ด 4 หลัก)</option>
             <option value="pvp">ดวลกับเพื่อน (สลับกันเล่น 2 คน)</option>
           </select>
 
-          <button id="openRoomModalBtn" class="btn-tactile" style="background: linear-gradient(180deg, #d4a017 0%, #8c6209 100%); color: #1a0f07; font-weight: 900; border: 1.5px solid var(--gold-highlight); cursor: pointer; padding: 6px 14px; border-radius: 6px;">
+          <button id="openRoomModalBtn" class="btn-tactile btn-gold-pill">
             🏰 ห้อง 4 หลัก (Online)
           </button>
 
-          <div id="activeRoomBadge" style="display: none; font-size: 12.5px; font-weight: 800; color: #4ade80; background: rgba(0,0,0,0.6); padding: 5px 14px; border-radius: 20px; border: 1.5px solid #22c55e;">
+          <div id="activeRoomBadge" class="active-room-pill" style="display: none;">
             🟢 ห้อง: <span id="activeRoomCodeText">----</span> (<span id="playerRoleText">โฮสต์</span>)
           </div>
         </div>
 
-        <div id="turnBanner" style="font-size: 14px; font-weight: 800; color: var(--gold-highlight); background: rgba(0,0,0,0.6); padding: 5px 18px; border-radius: 20px; border: 1px solid var(--gold-dark);">
+        <div id="turnBanner" class="turn-banner-pill">
           เทิร์นของผู้เล่น 1
         </div>
 
-        <div style="display: flex; gap: 8px;">
-          <button id="soundToggleBtn" class="btn-tactile" style="background: #24140b; border: 1px solid var(--gold-dark); color: #c7b89d; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer;">
+        <div class="ctrl-group-right">
+          <button id="soundToggleBtn" class="btn-tactile btn-wood-sub">
             เสียง: เปิด
           </button>
-          <button id="rulesBtn" class="btn-tactile" style="background: #24140b; border: 1px solid var(--gold-dark); color: #c7b89d; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer;">
+          <button id="rulesBtn" class="btn-tactile btn-wood-sub">
             กติกา
           </button>
-          <button id="restartBtn" class="btn-tactile" style="background: #24140b; border: 1px solid var(--gold-dark); color: #c7b89d; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer;">
+          <button id="restartBtn" class="btn-tactile btn-wood-sub">
             เริ่มใหม่
           </button>
         </div>
@@ -150,7 +150,7 @@
         </section>
 
         <!-- Player Hero Bar & Fanned Hand (Bottom) -->
-        <section id="p1Panel" class="hero-zone" style="margin-top: auto;">
+        <section id="p1Panel" class="hero-zone">
           <div class="hero-frame-wrap active-turn" id="p1HeroWrap">
             <div class="hero-portrait-socket">
               <div class="hero-avatar">
