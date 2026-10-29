@@ -42,14 +42,20 @@
 
   /* Layout */
   --font-family: 'Kanit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --card-width: 142px;
-  --card-height: 206px;
+  --card-width: 122px;
+  --card-height: 174px;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html, body {
+  height: 100%;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 /* ==========================================================================
@@ -86,10 +92,11 @@ body {
     repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0px, rgba(0, 0, 0, 0.18) 2px, transparent 2px, transparent 32px),
     linear-gradient(180deg, #2a170d 0%, #150a04 100%);
   color: #f8fafc;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  overflow: hidden;
   user-select: none;
   perspective: 1200px;
 }
@@ -99,16 +106,15 @@ body {
    ========================================================================== */
 header {
   background: linear-gradient(180deg, #382012 0%, #1c0e07 100%);
-  border-bottom: 3.5px solid var(--gold-dark);
+  border-bottom: 3px solid var(--gold-dark);
   box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.85),
+    0 4px 14px rgba(0, 0, 0, 0.85),
     inset 0 1px 0 rgba(255, 240, 153, 0.35);
-  padding: 6px 24px;
+  padding: 4px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
   z-index: 300;
 }
 
@@ -203,16 +209,17 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 6px auto 10px auto;
-  padding: 6px 18px;
+  margin: 3px auto 6px auto;
+  padding: 4px 14px;
   background: linear-gradient(180deg, rgba(38, 22, 12, 0.88) 0%, rgba(18, 9, 4, 0.94) 100%);
-  border: 2px solid #714a22;
-  border-radius: 24px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 240, 153, 0.2);
+  border: 1.5px solid #714a22;
+  border-radius: 20px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 240, 153, 0.2);
   max-width: 1320px;
   width: 100%;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
+  flex-shrink: 0;
   z-index: 100;
 }
 
@@ -302,21 +309,24 @@ header {
 }
 
 /* ==========================================================================
-   MAIN TABLETOP CONTAINER
+   MAIN TABLETOP CONTAINER (100% SINGLE-SCREEN FIT - NO SCROLLING)
    ========================================================================== */
 main {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 4px 16px 12px 16px;
+  padding: 2px 14px 4px 14px;
   max-width: 1440px;
   margin: 0 auto;
   width: 100%;
+  overflow: hidden;
 }
 
 .tab-content {
   display: none;
   flex: 1;
+  min-height: 0;
 }
 
 .tab-content.active {
@@ -324,19 +334,31 @@ main {
   flex-direction: column;
 }
 
+#tab-arena {
+  overflow: hidden;
+  height: 100%;
+}
+
+#tab-dex.active,
+#tab-print.active {
+  overflow-y: auto;
+  max-height: 100%;
+  padding-bottom: 24px;
+}
+
 /* ==========================================================================
    THE PANDARIA HEARTHSTONE BATTLEFIELD
    ========================================================================== */
 .tabletop-board {
   flex: 1;
+  min-height: 0;
   position: relative;
   overflow: visible;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 12px 64px 8px 64px;
-  min-height: 840px;
-  border-radius: 42px;
+  padding: 4px 44px 2px 44px;
+  border-radius: 28px;
 
   /* Sandy Arena Interior with Carved Stone Outer Frame */
   background-color: var(--arena-sand-mid);
@@ -388,7 +410,7 @@ main {
 }
 
 /* --------------------------------------------------------------------------
-   HERO ZONES & PROMINENT ARCHWAY (NO OVERLAPPING!)
+   HERO ZONES & PROMINENT ARCHWAY (COMPACT SINGLE-SCREEN FIT)
    -------------------------------------------------------------------------- */
 .hero-zone {
   display: flex;
@@ -396,19 +418,21 @@ main {
   justify-content: center;
   position: relative;
   width: 100%;
-  min-height: 108px;
+  min-height: 0;
   z-index: 30;
 }
 
 #p2Panel {
-  min-height: 136px;
+  min-height: 84px;
+  flex-shrink: 0;
   align-items: flex-end;
-  padding-bottom: 6px;
+  padding-bottom: 2px;
 }
 
 #p1Panel {
-  min-height: 112px;
-  margin-top: 6px;
+  min-height: 78px;
+  flex-shrink: 0;
+  margin-top: 0;
 }
 
 /* Hero Frame Socket (Contains Hero Portrait + Circular Hero Power) */
@@ -417,15 +441,15 @@ main {
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 6px 82px 6px 14px; /* Space on right holds Hero Power token */
+  padding: 3px 64px 3px 8px; /* Space on right holds Hero Power token */
   background: radial-gradient(circle at 40% 50%, #4a2818 0%, #26140b 70%, #170b05 100%);
-  border: 3.5px solid #997b53;
-  border-radius: 54px 54px 18px 18px;
+  border: 3px solid #997b53;
+  border-radius: 44px 44px 14px 14px;
   box-shadow:
     inset 0 2px 3px rgba(255, 255, 255, 0.35),
-    inset 0 -5px 10px rgba(0, 0, 0, 0.9),
-    0 0 0 2.5px #261c14,
-    0 8px 20px rgba(0, 0, 0, 0.85);
+    inset 0 -4px 8px rgba(0, 0, 0, 0.9),
+    0 0 0 2px #261c14,
+    0 6px 16px rgba(0, 0, 0, 0.85);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -461,11 +485,11 @@ main {
 .hero-frame-wrap::after {
   content: '2';
   position: absolute;
-  right: 10px;
+  right: 6px;
   top: 50%;
   transform: translateY(-50%);
-  width: 58px;
-  height: 58px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background-color: #1e293b;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='hpGlow' cx='45%25' cy='45%25' r='55%25'%3E%3Cstop offset='0%25' stop-color='%23fde047'/%3E%3Cstop offset='45%25' stop-color='%23ea580c'/%3E%3Cstop offset='90%25' stop-color='%237c2d12'/%3E%3Cstop offset='100%25' stop-color='%231c0a04'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='26' fill='url(%23hpGlow)' stroke='%23eab308' stroke-width='4.5'/%3E%3Cpath d='M32,14 Q38,26 44,28 Q36,36 34,46 Q28,38 24,38 Q24,28 32,14 Z' fill='%23fef08a'/%3E%3Cpolygon points='32,3 39,9 39,18 32,23 25,18 25,9' fill='%230284c7' stroke='%23bae6fd' stroke-width='1.5'/%3E%3C/svg%3E");
@@ -473,8 +497,8 @@ main {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 2px;
-  font-size: 13.5px;
+  padding-top: 1px;
+  font-size: 11.5px;
   font-weight: 900;
   color: #fff;
   text-shadow:
@@ -483,7 +507,7 @@ main {
     -1.5px  1.5px 0 #000,
      1.5px  1.5px 0 #000;
   box-shadow:
-    0 5px 12px rgba(0, 0, 0, 0.85),
+    0 4px 10px rgba(0, 0, 0, 0.85),
     0 0 0 2px #3b2816;
 }
 
@@ -497,10 +521,10 @@ main {
 /* Arched Oval Hero Portrait Socket */
 .hero-portrait-socket {
   position: relative;
-  width: 86px;
-  height: 100px;
-  margin-top: -6px;
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.9));
+  width: 72px;
+  height: 82px;
+  margin-top: -3px;
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.9));
 }
 
 .hero-avatar {
@@ -508,11 +532,11 @@ main {
   height: 100%;
   border-radius: 50% 50% 12px 12px / 52% 52% 12px 12px;
   background: radial-gradient(circle at 50% 35%, #422d1d, #140d08);
-  border: 4.5px solid #d4a017;
+  border: 4px solid #d4a017;
   box-shadow:
     inset 0 2px 6px rgba(255, 255, 255, 0.35),
-    inset 0 -6px 12px rgba(0, 0, 0, 0.85),
-    0 0 0 2.5px #2a1b10;
+    inset 0 -5px 10px rgba(0, 0, 0, 0.85),
+    0 0 0 2px #2a1b10;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -527,17 +551,17 @@ main {
 }
 
 .hero-avatar-icon {
-  font-size: 44px;
+  font-size: 38px;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.85));
 }
 
 /* Authentic Hearthstone Ruby Blood-Drop Health Gem */
 .health-orb {
   position: absolute;
-  bottom: -6px;
-  right: -10px;
-  width: 40px;
-  height: 46px;
+  bottom: -4px;
+  right: -8px;
+  width: 35px;
+  height: 40px;
   background-color: transparent;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 50'%3E%3Cdefs%3E%3CradialGradient id='heroRuby' cx='35%25' cy='38%25' r='58%25'%3E%3Cstop offset='0%25' stop-color='%23ff7a7a'/%3E%3Cstop offset='45%25' stop-color='%23dc2626'/%3E%3Cstop offset='85%25' stop-color='%237f1d1d'/%3E%3Cstop offset='100%25' stop-color='%233b0707'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cpath d='M22,2 C22,2 41,20 41,32 C41,42.5 32.5,48 22,48 C11.5,48 3,42.5 3,32 C3,20 22,2 22,2 Z' fill='url(%23heroRuby)' stroke='%23fef08a' stroke-width='2.5'/%3E%3Cellipse cx='14' cy='26' rx='3.5' ry='7' transform='rotate(-22 14 26)' fill='%23ffffff' opacity='0.45'/%3E%3C/svg%3E");
   background-size: 100% 100%;
@@ -545,8 +569,8 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 8px;
-  font-size: 19px;
+  padding-top: 6px;
+  font-size: 16px;
   font-weight: 900;
   color: #fff;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.95));
@@ -690,28 +714,28 @@ main {
    -------------------------------------------------------------------------- */
 .enemy-hand-strip {
   position: absolute;
-  top: 2px;
+  top: 0px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   justify-content: center;
-  height: 48px;
+  height: 38px;
   z-index: 20;
 }
 
 .enemy-card-back {
-  width: 38px;
-  height: 52px;
+  width: 28px;
+  height: 38px;
   background: radial-gradient(circle at 50% 50%, #2563eb 0%, #1e3a8a 52%, #713f12 100%);
-  border: 2px solid #facc15;
-  border-radius: 6px;
+  border: 1.5px solid #facc15;
+  border-radius: 4px;
   box-shadow:
-    inset 0 0 0 1.5px #1e40af,
-    0 6px 12px rgba(0, 0, 0, 0.85);
+    inset 0 0 0 1px #1e40af,
+    0 4px 8px rgba(0, 0, 0, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 -4px;
+  margin: 0 -3px;
   transform: rotate(3deg);
   transition: transform 0.2s ease;
 }
@@ -721,8 +745,8 @@ main {
 }
 
 .enemy-card-back svg {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   fill: #fde047;
   filter: drop-shadow(0 0 4px #38bdf8);
 }
@@ -733,10 +757,11 @@ main {
 .center-battleground {
   flex: 1;
   display: grid;
-  grid-template-columns: 80px minmax(0, 1fr) 80px;
-  gap: 12px;
+  grid-template-columns: 62px minmax(0, 1fr) 62px;
+  gap: 8px;
   align-items: center;
-  min-height: 300px;
+  min-height: 0;
+  margin: 1px 0;
   position: relative;
   z-index: 20;
 }
@@ -745,46 +770,45 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 3px;
 }
 
 .slot-card-holder {
-  width: 76px;
-  height: 108px;
-  border: 2.5px solid #63503d;
-  border-radius: 10px;
+  width: 58px;
+  height: 80px;
+  border: 2px solid #63503d;
+  border-radius: 8px;
   background: rgba(30, 20, 12, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.75);
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.75);
 }
 
 .slot-label {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 900;
   color: #fff;
   background: #33271d;
   border: 1px solid #78634e;
-  padding: 2px 9px;
-  border-radius: 6px;
+  padding: 1px 7px;
+  border-radius: 5px;
   text-shadow: 0 1px 2px #000;
 }
 
 /* 3D Draw Deck Stack */
 .deck-stack-3d {
-  width: 76px;
-  height: 110px;
+  width: 58px;
+  height: 82px;
   background: linear-gradient(135deg, #d97706 0%, #92400e 55%, #451a03 100%);
-  border-radius: 8px;
-  border: 2.5px solid #fde047;
+  border-radius: 7px;
+  border: 2px solid #fde047;
   box-shadow:
-    inset 0 0 8px rgba(0, 0, 0, 0.65),
+    inset 0 0 6px rgba(0, 0, 0, 0.65),
     2px 2px 0 #78350f,
     4px 4px 0 #451a03,
-    7px 7px 0 #1c1917,
-    0 8px 18px rgba(0, 0, 0, 0.85);
+    0 6px 14px rgba(0, 0, 0, 0.85);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -799,11 +823,11 @@ main {
 }
 
 .deck-inner-seal {
-  border: 1.5px solid rgba(254, 240, 138, 0.55);
+  border: 1px solid rgba(254, 240, 138, 0.55);
   background: radial-gradient(circle at 50% 50%, #1e40af 0%, #172554 80%);
   width: 82%;
   height: 84%;
-  border-radius: 5px;
+  border-radius: 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -812,42 +836,42 @@ main {
 }
 
 .deck-count-num {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 900;
   color: #fff;
-  text-shadow: 0 1.5px 3px #000;
-  margin-top: 2px;
+  text-shadow: 0 1px 2px #000;
+  margin-top: 1px;
 }
 
 /* --------------------------------------------------------------------------
    THE MINION ARENA STAGE (LANES + MIDLINE)
    -------------------------------------------------------------------------- */
 .duel-clash-stage {
-  height: auto;
+  height: 100%;
   align-self: stretch;
-  min-height: 290px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  justify-content: space-between;
-  gap: 6px;
-  padding: 10px 14px;
-  border-radius: 20px;
+  justify-content: space-evenly;
+  gap: 2px;
+  padding: 4px 10px;
+  border-radius: 16px;
   background:
     radial-gradient(ellipse at center, rgba(255, 241, 204, .25), transparent 66%),
     linear-gradient(180deg, rgba(82, 54, 25, .12), rgba(75, 49, 24, .22));
-  box-shadow: inset 0 0 28px rgba(77, 51, 25, .28);
+  box-shadow: inset 0 0 20px rgba(77, 51, 25, .28);
 }
 
 .battlefield-lane {
   position: relative;
   z-index: 24;
-  min-height: 100px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  justify-content: flex-start;
-  gap: 4px;
+  justify-content: center;
+  gap: 2px;
 }
 
 .lane-caption {
@@ -857,7 +881,7 @@ main {
   width: min(100%, 640px);
   margin: 0 auto;
   color: rgba(69, 38, 14, 0.88);
-  font-size: 11.5px;
+  font-size: 9.5px;
   line-height: 1;
   font-weight: 900;
   letter-spacing: .4px;
@@ -866,63 +890,63 @@ main {
 
 .minion-row {
   width: min(100%, 720px);
-  min-height: 98px;
+  min-height: 66px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(6px, 1.8vw, 20px);
+  gap: clamp(4px, 1.2vw, 14px);
   position: relative;
 }
 
 /* Center Horizontal Seam with Ticker and End Turn Switch */
 .battlefield-midline {
   position: relative;
-  min-height: 48px;
+  min-height: 36px;
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 124px;
+  grid-template-columns: 22px minmax(0, 1fr) 110px;
   align-items: center;
-  gap: 12px;
-  padding: 0 8px;
-  border-top: 1.5px solid rgba(103, 70, 36, .3);
-  border-bottom: 1.5px solid rgba(103, 70, 36, .3);
+  gap: 6px;
+  padding: 0 4px;
+  border-top: 1px solid rgba(103, 70, 36, .25);
+  border-bottom: 1px solid rgba(103, 70, 36, .25);
 }
 
 .lane-divider-rune {
   color: rgba(146, 96, 40, 0.65);
-  font-size: 20px;
-  text-shadow: 0 0 10px rgba(255, 247, 208, .9);
+  font-size: 16px;
+  text-shadow: 0 0 8px rgba(255, 247, 208, .9);
 }
 
 .battle-ticker-msg {
   width: 100%;
-  padding: 6px 18px;
+  padding: 4px 12px;
   color: #fff8dc;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: .15px;
-  text-shadow: 0 1px 3px #1f1105;
-  border: 1.5px solid rgba(153, 112, 42, .8);
+  letter-spacing: .1px;
+  text-shadow: 0 1px 2px #1f1105;
+  border: 1px solid rgba(153, 112, 42, .8);
   background: rgba(30, 20, 11, 0.82);
-  border-radius: 18px;
+  border-radius: 14px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .battle-ticker-msg.targeting {
   color: #fff3a1;
   border-color: #4ade80;
-  box-shadow: 0 0 16px rgba(74, 222, 128, .5), 0 4px 14px rgba(0, 0, 0, .7);
+  box-shadow: 0 0 12px rgba(74, 222, 128, .5), 0 3px 10px rgba(0, 0, 0, .7);
 }
 
 /* --------------------------------------------------------------------------
    THE 3D "END TURN" SWITCH (PROMINENT, TACTILE & RESPONSIVE)
    -------------------------------------------------------------------------- */
 .turn-crown-btn {
-  width: 122px;
-  height: 48px;
+  width: 110px;
+  height: 38px;
   background: linear-gradient(180deg, #bef264 0%, #84cc16 35%, #4d7c0f 80%, #365314 100%);
-  border: 3.5px solid #fde047;
+  border: 2.5px solid #fde047;
   color: #fff;
   font-family: inherit;
   font-size: 13.5px;
@@ -1193,46 +1217,47 @@ main {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  height: 180px;
+  height: 125px;
+  flex-shrink: 0;
   position: relative;
-  margin-top: 14px;
-  padding-bottom: 2px;
+  margin-top: 0px;
+  padding-bottom: 0px;
   z-index: 60;
 }
 
 .fanned-hand-zone .card-item {
   position: absolute;
-  bottom: -46px;
+  bottom: -22px;
   transform-origin: center 130%;
   transform: translateX(var(--card-tx, 0px)) translateY(var(--card-ty, 0px)) rotate(var(--card-rot, 0deg));
   /* Neon Green Playable Border Glow */
   box-shadow:
-    0 0 0 2.5px var(--neon-green-aura),
-    0 0 16px 3px rgba(74, 222, 128, 0.75),
-    0 8px 20px rgba(0, 0, 0, 0.85);
+    0 0 0 2px var(--neon-green-aura),
+    0 0 14px 2px rgba(74, 222, 128, 0.75),
+    0 6px 14px rgba(0, 0, 0, 0.85);
   transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease, filter 0.22s ease;
 }
 
 .fanned-hand-zone .card-item.unplayable {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.85);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.85);
   filter: brightness(0.82);
 }
 
 .fanned-hand-zone .card-item::after {
   content: '';
   position: absolute;
-  inset: 0 0 -50px 0;
+  inset: 0 0 -40px 0;
   pointer-events: auto;
   z-index: -1;
 }
 
 /* Hover Magnification: Lifts with Radiant Golden Aura */
 .fanned-hand-zone .card-item:hover {
-  transform: translateX(var(--card-tx, 0px)) translateY(-96px) rotate(0deg) scale(1.18) !important;
+  transform: translateX(var(--card-tx, 0px)) translateY(-65px) rotate(0deg) scale(1.18) !important;
   box-shadow:
-    0 0 0 3px var(--neon-yellow-aura),
-    0 0 28px 8px rgba(255, 230, 0, 0.95),
-    0 24px 45px rgba(0, 0, 0, 0.95);
+    0 0 0 2.5px var(--neon-yellow-aura),
+    0 0 24px 6px rgba(255, 230, 0, 0.95),
+    0 20px 36px rgba(0, 0, 0, 0.95);
   z-index: 200 !important;
   border-color: #fff;
   filter: brightness(1.08);
@@ -1247,19 +1272,19 @@ main {
   background-color: #4d4134;
   background-image:
     radial-gradient(circle at 50% 30%, #6e5e4d 0%, #42372c 60%, #241c14 100%);
-  border-radius: 14px;
-  border: 3.5px solid #b8860b;
+  border-radius: 11px;
+  border: 2.5px solid #b8860b;
   display: flex;
   flex-direction: column;
-  padding: 6px 6px 8px 6px;
+  padding: 4px 4px 5px 4px;
   position: relative;
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
   box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.85),
+    0 6px 16px rgba(0, 0, 0, 0.85),
     inset 0 0 0 1.5px #fde68a,
-    inset 0 -5px 10px rgba(0, 0, 0, 0.8);
+    inset 0 -4px 8px rgba(0, 0, 0, 0.8);
   transition:
     transform 0.22s cubic-bezier(0.2, 0.85, 0.25, 1.15),
     box-shadow 0.22s ease,
@@ -1271,17 +1296,17 @@ main {
 /* Faceted Sapphire Mana Crystal (Top-Left) */
 .card-mana-gem {
   position: absolute;
-  top: -9px;
-  left: -9px;
-  width: 36px;
-  height: 42px;
+  top: -6px;
+  left: -6px;
+  width: 30px;
+  height: 34px;
   background: radial-gradient(circle at 35% 30%, #e0f2fe 0%, #38bdf8 35%, #0284c7 70%, #1e3a8a 100%);
-  border: 2px solid #bae6fd;
+  border: 1.5px solid #bae6fd;
   clip-path: polygon(50% 0%, 96% 24%, 96% 76%, 50% 100%, 4% 76%, 4% 24%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 900;
   color: #fff;
   text-shadow:
@@ -1290,21 +1315,21 @@ main {
     -1.5px  1.5px 0 #000,
      1.5px  1.5px 0 #000,
      0 2px 4px rgba(0, 0, 0, 0.95);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.9), 0 0 12px var(--mana-blue-glow);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.9), 0 0 10px var(--mana-blue-glow);
   z-index: 15;
 }
 
 /* Class / Tribe Seal (Top-Right) */
 .card-class-seal {
   position: absolute;
-  top: 3px;
-  right: 5px;
-  font-size: 8.5px;
+  top: 2px;
+  right: 4px;
+  font-size: 7.5px;
   font-weight: 800;
-  padding: 1px 6px;
-  border-radius: 8px;
+  padding: 1px 5px;
+  border-radius: 6px;
   background: linear-gradient(180deg, #382012 0%, #170c06 100%);
-  border: 1.2px solid var(--gold-primary);
+  border: 1px solid var(--gold-primary);
   color: var(--gold-highlight);
   letter-spacing: 0.2px;
   z-index: 12;
@@ -1314,16 +1339,16 @@ main {
 /* Oval Minion Art Frame */
 .card-art-frame {
   width: 90%;
-  height: 92px;
-  margin: 6px auto 0 auto;
+  height: 74px;
+  margin: 4px auto 0 auto;
   border-radius: 50% / 46%;
   overflow: hidden;
   background: #090604;
-  border: 3px solid #d4a017;
+  border: 2.5px solid #d4a017;
   position: relative;
   box-shadow:
-    0 3px 8px rgba(0, 0, 0, 0.85),
-    inset 0 0 10px rgba(0, 0, 0, 0.9);
+    0 2px 6px rgba(0, 0, 0, 0.85),
+    inset 0 0 8px rgba(0, 0, 0, 0.9);
   z-index: 4;
 }
 
@@ -1342,17 +1367,17 @@ main {
 .card-banner-ribbon {
   background: linear-gradient(180deg, #f5ebd5 0%, #d6bc8b 55%, #b59560 100%);
   border: 1.5px solid #573a1d;
-  border-radius: 12px 12px 5px 5px;
-  padding: 2px 8px;
-  margin: -9px -2px 0 -2px;
+  border-radius: 10px 10px 4px 4px;
+  padding: 1px 6px;
+  margin: -7px -2px 0 -2px;
   text-align: center;
   position: relative;
   z-index: 8;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
 }
 
 .card-title-text {
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 900;
   color: #fff;
   white-space: nowrap;
@@ -1369,32 +1394,32 @@ main {
 /* Recessed Parchment Text Box */
 .card-rules-parchment {
   background: radial-gradient(circle at 50% 50%, #f9f1df 0%, #dec8a0 100%);
-  border: 1.5px solid #634727;
-  border-radius: 6px;
-  padding: 4px 6px;
-  margin-top: 3px;
+  border: 1px solid #634727;
+  border-radius: 5px;
+  padding: 2px 4px;
+  margin-top: 2px;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  box-shadow: inset 0 2px 4px rgba(66, 40, 14, 0.35);
+  box-shadow: inset 0 1px 3px rgba(66, 40, 14, 0.35);
   position: relative;
   z-index: 5;
 }
 
 .skill-headline {
-  font-size: 10.5px;
+  font-size: 9px;
   font-weight: 900;
   color: #451a03;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .skill-description {
-  font-size: 9.5px;
+  font-size: 8px;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.15;
   color: #2b1d10;
   margin-top: 1px;
   display: -webkit-box;
@@ -1406,12 +1431,12 @@ main {
 /* Attack & Health Stat Crests */
 .stat-crest {
   position: absolute;
-  width: 34px;
-  height: 36px;
+  width: 28px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 17px;
+  font-size: 14px;
   font-weight: 900;
   color: #fff;
   text-shadow:
@@ -1424,24 +1449,24 @@ main {
 }
 
 .stat-crest.attack-crest {
-  bottom: -8px;
-  left: -8px;
+  bottom: -6px;
+  left: -6px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 32%, #fef9c3 0%, #facc15 45%, #ca8a04 80%, #713f12 100%);
   border: 2px solid #fef08a;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.9), 0 0 10px rgba(250, 204, 21, 0.6);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.9), 0 0 8px rgba(250, 204, 21, 0.6);
 }
 
 .stat-crest.defense-crest {
-  bottom: -9px;
-  right: -8px;
-  height: 39px;
-  padding-top: 3px;
+  bottom: -6px;
+  right: -6px;
+  height: 32px;
+  padding-top: 2px;
   background: radial-gradient(circle at 35% 38%, #fca5a5 0%, #ef4444 45%, #b91c1c 80%, #450a0a 100%);
-  border: 2px solid #fecaca;
+  border: 1.5px solid #fecaca;
   border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
   clip-path: polygon(50% 0%, 88% 33%, 100% 68%, 82% 95%, 50% 100%, 18% 95%, 0% 68%, 12% 33%);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.9), 0 0 10px rgba(239, 68, 68, 0.6);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.9), 0 0 8px rgba(239, 68, 68, 0.6);
 }
 
 /* ==========================================================================
@@ -1913,140 +1938,144 @@ main {
    ========================================================================== */
 @media (max-width: 960px) {
   :root {
-    --card-width: 125px;
-    --card-height: 182px;
+    --card-width: 108px;
+    --card-height: 154px;
   }
   .tabletop-board {
-    padding: 12px 36px 10px;
-    min-height: 720px;
+    padding: 3px 20px 2px;
+    min-height: 0;
   }
   .center-battleground {
-    grid-template-columns: 60px minmax(0, 1fr) 60px;
-    gap: 8px;
+    grid-template-columns: 50px minmax(0, 1fr) 50px;
+    gap: 6px;
   }
   .tabletop-slot {
     transform: scale(0.85);
   }
   .turn-crown-btn {
-    width: 106px;
-    height: 44px;
-    font-size: 12px;
+    width: 96px;
+    height: 36px;
+    font-size: 11px;
   }
   .minion-token {
-    width: 66px;
-    height: 84px;
+    width: 54px;
+    height: 70px;
   }
   .fanned-hand-zone {
-    height: 155px;
+    height: 115px;
   }
   .fanned-hand-zone .card-item {
-    bottom: -36px;
+    bottom: -18px;
   }
 }
 
 @media (max-width: 640px) {
   :root {
-    --card-width: 88px;
-    --card-height: 130px;
+    --card-width: 82px;
+    --card-height: 118px;
   }
   header {
-    padding: 6px 12px;
+    padding: 3px 8px;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 4px;
   }
   .logo-text h1 {
-    font-size: 14px;
+    font-size: 13px;
   }
   .top-control-bar {
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 4px;
+    padding: 3px 6px;
+    margin: 2px auto 4px auto;
   }
   .tabletop-board {
-    padding: 8px 12px 8px;
-    min-height: 580px;
-    border-width: 8px;
+    padding: 4px 8px 2px;
+    min-height: 0;
+    border-width: 6px;
+    border-radius: 16px;
   }
   .hero-meta {
-    left: 8px;
-    padding: 3px 8px;
+    left: 6px;
+    padding: 2px 6px;
   }
   .hero-title-name {
-    font-size: 11px;
+    font-size: 10px;
   }
   .hero-sub-status {
-    font-size: 9px;
+    font-size: 8px;
   }
   .mana-tray {
-    right: 8px;
-    padding: 4px 8px;
-    gap: 4px;
+    right: 6px;
+    padding: 3px 6px;
+    gap: 3px;
   }
   .mana-counter-label {
-    font-size: 12px;
-  }
-  .hero-portrait-socket {
-    width: 64px;
-    height: 78px;
-  }
-  .hero-avatar-icon {
-    font-size: 32px;
-  }
-  .health-orb {
-    width: 32px;
-    height: 38px;
-    font-size: 15px;
-  }
-  .hero-frame-wrap::after {
-    width: 44px;
-    height: 44px;
-    right: 6px;
     font-size: 11px;
   }
+  .hero-portrait-socket {
+    width: 58px;
+    height: 68px;
+  }
+  .hero-avatar-icon {
+    font-size: 28px;
+  }
+  .health-orb {
+    width: 28px;
+    height: 32px;
+    font-size: 13px;
+    padding-top: 4px;
+  }
+  .hero-frame-wrap::after {
+    width: 38px;
+    height: 38px;
+    right: 4px;
+    font-size: 10px;
+  }
   .center-battleground {
-    grid-template-columns: 36px minmax(0, 1fr) 36px;
+    grid-template-columns: 32px minmax(0, 1fr) 32px;
     gap: 4px;
   }
   .tabletop-slot {
-    transform: scale(0.65);
+    transform: scale(0.6);
   }
   .turn-crown-btn {
-    width: 86px;
-    height: 38px;
-    font-size: 10.5px;
+    width: 78px;
+    height: 32px;
+    font-size: 9.5px;
   }
   .minion-token {
-    width: 52px;
-    height: 68px;
+    width: 44px;
+    height: 56px;
   }
   .minion-stat {
-    width: 22px;
-    height: 24px;
-    font-size: 12px;
+    width: 19px;
+    height: 20px;
+    font-size: 10.5px;
   }
   .fanned-hand-zone {
-    height: 125px;
+    height: 95px;
   }
   .fanned-hand-zone .card-item {
-    bottom: -28px;
+    bottom: -14px;
   }
   .card-mana-gem {
-    width: 26px;
-    height: 30px;
-    font-size: 14px;
-  }
-  .stat-crest {
-    width: 24px;
+    width: 22px;
     height: 26px;
     font-size: 12px;
   }
-  .card-banner-ribbon {
-    font-size: 8px;
+  .stat-crest {
+    width: 20px;
+    height: 22px;
+    font-size: 10.5px;
   }
-  .skill-headline {
+  .card-banner-ribbon {
     font-size: 7.5px;
   }
+  .skill-headline {
+    font-size: 7px;
+  }
   .skill-description {
-    font-size: 6.5px;
+    font-size: 6px;
   }
 }
 
