@@ -1787,17 +1787,72 @@ main {
 
 /* Persistent minion combat field */
 .tabletop-board {
-  min-height: 640px;
-  padding: 8px 54px 4px;
+  min-height: 700px;
+  padding: 8px 54px;
+  justify-content: flex-start;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.tabletop-board::before,
+.tabletop-board::after {
+  display: none;
 }
 
 .hero-zone {
   min-height: 78px;
 }
 
+#p2Panel {
+  min-height: 138px;
+  flex-shrink: 0;
+  align-items: flex-end;
+}
+
 .hero-frame-wrap {
   padding: 4px 72px 4px 10px;
   transform: scale(.88);
+}
+
+#p2Panel .hero-frame-wrap {
+  transform: scale(.78);
+  transform-origin: center bottom;
+}
+
+#p1Panel {
+  flex-shrink: 0;
+}
+
+#p2Panel .mana-tray,
+#p1Panel .mana-tray {
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 36;
+}
+
+#p2Panel .mana-tray {
+  right: 10px;
+}
+
+.enemy-hand-strip {
+  top: 2px;
+  left: 50%;
+  height: 48px;
+  align-items: flex-start;
+  transform: translateX(-50%);
+  z-index: 40;
+}
+
+.enemy-card-back {
+  width: 34px;
+  height: 46px;
+  margin: 0 -4px;
+  border-width: 2px;
+}
+
+.enemy-card-back svg {
+  width: 15px;
+  height: 15px;
 }
 
 .hero-frame-wrap::after {
@@ -1820,7 +1875,7 @@ main {
 .center-battleground {
   grid-template-columns: 66px minmax(0, 1fr) 66px;
   gap: 8px;
-  min-height: 272px;
+  min-height: 250px;
 }
 
 .tabletop-slot {
@@ -1829,7 +1884,8 @@ main {
 
 .duel-clash-stage {
   height: auto;
-  min-height: 258px;
+  align-self: stretch;
+  min-height: 244px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -1846,7 +1902,7 @@ main {
 .battlefield-lane {
   position: relative;
   z-index: 24;
-  min-height: 98px;
+  min-height: 90px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -1870,7 +1926,7 @@ main {
 
 .minion-row {
   width: min(100%, 680px);
-  min-height: 82px;
+  min-height: 78px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -1882,9 +1938,11 @@ main {
 .battlefield-midline {
   position: relative;
   min-height: 38px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 104px;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  padding: 0 6px;
   border-top: 1px solid rgba(103, 70, 36, .25);
   border-bottom: 1px solid rgba(103, 70, 36, .25);
 }
@@ -1896,7 +1954,10 @@ main {
 }
 
 .battle-ticker-msg {
-  max-width: min(62%, 490px);
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
   padding: 4px 14px;
   color: #fff7df;
   font-size: 11px;
@@ -1913,15 +1974,35 @@ main {
 }
 
 .turn-crown-btn {
-  right: -42px;
-  width: 102px;
-  height: 46px;
+  position: relative;
+  top: auto;
+  right: auto;
+  width: 104px;
+  height: 42px;
   font-size: 12px;
+  transform: none;
+}
+
+.turn-crown-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.03);
+}
+
+.turn-crown-btn:active:not(:disabled),
+.turn-crown-btn:disabled,
+.turn-crown-btn.disabled {
+  transform: none !important;
 }
 
 .turn-crown-btn small {
   font-size: 9px;
   letter-spacing: 1px;
+}
+
+.fanned-hand-zone {
+  height: 220px;
+  flex-shrink: 0;
+  margin-top: 0;
+  padding-bottom: 0;
 }
 
 .minion-token {
@@ -2122,24 +2203,7 @@ main {
 }
 
 .combat-log {
-  position: absolute;
-  z-index: 35;
-  left: 12px;
-  top: 50%;
-  width: 154px;
-  max-height: 126px;
-  overflow: hidden auto;
-  padding: 5px 7px;
-  border: 1px solid rgba(161, 125, 76, .75);
-  border-radius: 9px;
-  color: #f5e5c7;
-  background: rgba(23, 15, 9, .76);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .55), inset 0 0 12px rgba(0, 0, 0, .32);
-  font-size: 9px;
-  line-height: 1.25;
-  transform: translateY(-50%);
-  scrollbar-width: thin;
-  scrollbar-color: #a17d4c transparent;
+  display: none;
 }
 
 .combat-log .log-entry {
@@ -2192,8 +2256,9 @@ main {
   .tabletop-board { padding-left: 38px; padding-right: 38px; }
   .center-battleground { grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 2px; }
   .tabletop-slot { transform: scale(.66); }
-  .turn-crown-btn { right: -30px; width: 88px; }
-  .battle-ticker-msg { max-width: 66%; font-size: 10px; padding-inline: 8px; }
+  .battlefield-midline { grid-template-columns: 20px minmax(0, 1fr) 88px; gap: 6px; }
+  .turn-crown-btn { right: auto; width: 88px; }
+  .battle-ticker-msg { max-width: none; font-size: 10px; padding-inline: 8px; }
   .minion-row { gap: clamp(3px, .8vw, 10px); }
 }
 
@@ -2208,6 +2273,8 @@ main {
   .turn-banner-pill { order: 3; width: 100%; text-align: center; }
   .tabletop-board { min-height: 540px; padding: 5px 8px 0; border-width: 8px; border-radius: 20px; }
   .hero-zone { min-height: 68px; }
+  #p2Panel { min-height: 108px; }
+  #p2Panel .hero-frame-wrap { transform: scale(.58); }
   .hero-frame-wrap { transform: scale(.72); }
   .hero-meta { left: -32px; }
   .combat-log { display: none; }
@@ -2230,8 +2297,9 @@ main {
   .minion-taunt { font-size: 6px; top: -4px; }
   .battlefield-midline { min-height: 28px; }
   .lane-divider-rune { display: none; }
-  .battle-ticker-msg { max-width: calc(100% - 76px); font-size: 8px; padding: 3px 5px; }
-  .turn-crown-btn { right: 0; width: 72px; height: 34px; font-size: 9px; border-width: 2px; }
+  .battlefield-midline { grid-template-columns: minmax(0, 1fr) 72px; gap: 4px; padding-inline: 2px; }
+  .battle-ticker-msg { max-width: none; font-size: 8px; padding: 3px 5px; }
+  .turn-crown-btn { right: auto; width: 72px; height: 34px; font-size: 9px; border-width: 2px; }
   .turn-crown-btn small { font-size: 7px; }
   .fanned-hand-zone { height: 145px; margin-top: -5px; }
   :root { --card-width: 78px; --card-height: 116px; }
