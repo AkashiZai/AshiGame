@@ -1019,6 +1019,11 @@ class MemeGame {
       return;
     }
 
+    const endingPlayer = this[this.turn];
+    if (endingPlayer) {
+      endingPlayer.weaken = 0;
+    }
+
     if (this.turn === 'p1') {
       this.startTurn('p2');
     } else {
@@ -1267,8 +1272,14 @@ class MemeGame {
       });
     }
 
-    const attackPower = attacker.atk;
-    const retaliation = targetMinion ? targetMinion.atk : 0;
+    const owner = this[playerKey];
+    let attackPower = Math.max(1, attacker.atk - (owner.weaken || 0));
+    if (owner.blinded) {
+      attackPower = 1;
+      owner.blinded = false;
+      this.addLog(`😎 ${attacker.card.name} โจมตีขณะตาบอด! ทำดาเมจได้เพียง 1 หน่วย`);
+    }
+    const retaliation = targetMinion ? Math.max(1, targetMinion.atk - (defender.weaken || 0)) : 0;
     const generation = this.combatGeneration;
     setTimeout(() => {
       if (generation !== this.combatGeneration) return;
@@ -1448,15 +1459,16 @@ class MemeGame {
 
       case 'break_guard':
         if (target.shield > 0) {
-          this.addLog(`🔨 หมัดทลายเกราะ! ลบล้างเกราะ ${target.shield} ของ ${target.name} ทิ้งทั้งหมด!`);
-          target.shield = 0;
+          const broken = Math.min(target.shield, skill.shieldBreak || 4);
+          target.shield -= broken;
+          this.addLog(`🔨 หมัดทลายเกราะ! ทำลายเกราะของ ${target.name} ไป ${broken} หน่วย!`);
         }
-        this.dealDamage(target, skill.dmgVal || 8, user.name);
+        this.dealDamage(target, skill.dmgVal || 4, user.name);
         break;
 
       case 'poison_drain':
-        this.dealDamage(target, skill.dmgVal || 4, user.name);
-        target.poison += (skill.poisonVal || 3);
+        this.dealDamage(target, skill.dmgVal || 2, user.name);
+        target.poison += (skill.poisonVal || 2);
         this.addLog(`🧪 ${target.name} สูดควันพิษเข้าไป ติดพิษสะสม ${target.poison} หน่วย!`);
         break;
 
@@ -1470,20 +1482,21 @@ class MemeGame {
         break;
 
       case 'weaken_heal':
-        user.hp = Math.min(user.maxHp, user.hp + (skill.healVal || 4));
-        target.weaken = 3;
+        user.hp = Math.min(user.maxHp, user.hp + (skill.healVal || 3));
+        target.weaken = skill.weakenVal || 2;
         sfx.play('heal');
         break;
 
       case 'berserk_buff':
-        const bonus = (skill.boostAtk || 6) + user.shield;
+        const rawBonus = (skill.boostAtk || 3) + user.shield;
+        const bonus = Math.min(skill.maxDmg || 6, rawBonus);
         user.shield = 0;
         this.dealDamage(target, bonus, user.name);
-        this.addLog(`🔥 บ้าคลั่งขั้นสุด! สละเกราะแปลงเป็นพลังหมัดระเบิด ${bonus} ดาเมจ!`);
+        this.addLog(`🔥 ฉีกเสื้อท้าดวล! สละเกราะปล่อยหมัดระเบิด ${bonus} ดาเมจ!`);
         break;
 
       case 'lifesteal':
-        const drain = skill.dmgVal || 6;
+        const drain = skill.dmgVal || 3;
         this.dealDamage(target, drain, user.name);
         user.hp = Math.min(user.maxHp, user.hp + drain);
         sfx.play('heal');
@@ -1491,22 +1504,30 @@ class MemeGame {
         break;
 
       case 'quick_draw':
-        this.dealDamage(target, skill.dmgVal || 4, user.name);
-        this.drawCard(user, true);
-        this.drawCard(user, true);
+        this.dealDamage(target, skill.dmgVal || 2, user.name);
+        for (let i = 0; i < (skill.drawCount || 1); i++) {
+          this.drawCard(user, true);
+        }
         break;
 
       case 'grant_energy':
-        user.energy += (skill.energyVal || 2);
-        user.shield += (skill.shieldVal || 4);
+        user.energy = Math.min(6, user.energy + (skill.energyVal || 1));
+        user.shield += (skill.shieldVal || 2);
         break;
 
       case 'nuke_strike':
-        this.dealDamage(target, skill.dmgVal || 10, user.name);
+        this.dealDamage(target, skill.dmgVal || 4, user.name);
+        if (skill.aoeDmg && target.board.length > 0) {
+          target.board.forEach((m) => {
+            m.health -= skill.aoeDmg;
+          });
+          this.addLog(`💣 แรงระเบิดกวาดดาเมจ ${skill.aoeDmg} ใส่มินเนียนศัตรูทุกตัว!`);
+          this.removeDefeatedMinions(target);
+        }
         break;
 
       case 'silence_skill':
-        this.dealDamage(target, skill.dmgVal || 4, user.name);
+        this.dealDamage(target, skill.dmgVal || 2, user.name);
         target.silenced = true;
         this.addLog(`🤫 ${target.name} ถูกสั่งห้ามพูด ติดสถานะใบ้สกิลในเทิร์นหน้า!`);
         break;
@@ -1515,19 +1536,19 @@ class MemeGame {
         user.poison = 0;
         user.weaken = 0;
         user.blinded = false;
-        user.hp = Math.min(user.maxHp, user.hp + (skill.healVal || 6));
+        user.hp = Math.min(user.maxHp, user.hp + (skill.healVal || 4));
         sfx.play('heal');
         this.addLog(`✨ ล้างมลทินและดีบัฟทั้งหมดสะอาดเกลี้ยง!`);
         break;
 
       case 'blind_enemy':
-        this.dealDamage(target, skill.dmgVal || 5, user.name);
+        this.dealDamage(target, skill.dmgVal || 3, user.name);
         target.blinded = true;
         this.addLog(`😎 ${target.name} โดนพ่นหมึกเข้าตา ติดสถานะตาบอด!`);
         break;
 
       case 'steal_hand_card':
-        this.dealDamage(target, skill.dmgVal || 7, user.name);
+        this.dealDamage(target, skill.dmgVal || 3, user.name);
         if (target.hand.length > 0 && user.hand.length < 7) {
           const stolenIdx = Math.floor(Math.random() * target.hand.length);
           const stolenCard = target.hand.splice(stolenIdx, 1)[0];
@@ -1801,8 +1822,8 @@ class MemeGame {
     this.renderMinions(myPlayer, this.p1BoardZone, myKey);
     this.renderMinions(oppPlayer, this.p2BoardZone, oppKey);
 
-    const myTotalAtk = myPlayer.board.reduce((sum, m) => sum + m.atk, 0);
-    const oppTotalAtk = oppPlayer.board.reduce((sum, m) => sum + m.atk, 0);
+    const myTotalAtk = myPlayer.board.reduce((sum, m) => sum + Math.max(1, m.atk - (myPlayer.weaken || 0)), 0);
+    const oppTotalAtk = oppPlayer.board.reduce((sum, m) => sum + Math.max(1, m.atk - (oppPlayer.weaken || 0)), 0);
     document.getElementById('p1MinionCount').innerText = `${myPlayer.board.length}/7 ตัว • รวมพลังโจมตี ${myTotalAtk}`;
     document.getElementById('p2MinionCount').innerText = `${oppPlayer.board.length}/7 ตัว • รวมพลังโจมตี ${oppTotalAtk}`;
 
@@ -1947,15 +1968,16 @@ class MemeGame {
         badgeHtml = `<span class="minion-sleep-tag" title="เพิ่งอัญเชิญ เริ่มโจมตีได้ในเทิร์นถัดไป">💤 รอเทิร์นหน้า</span>`;
       }
 
+      const effectiveAtk = Math.max(1, minion.atk - (player.weaken || 0));
       token.innerHTML = `
         <span class="minion-aura"></span>
         <span class="minion-art"><img src="${minion.card.image}" alt="" draggable="false" /></span>
         ${badgeHtml}
         <span class="minion-name">${minion.card.name}</span>
-        <span class="minion-stat minion-atk" title="พลังโจมตี">${minion.atk}</span>
+        <span class="minion-stat minion-atk" title="พลังโจมตี">${effectiveAtk}</span>
         <span class="minion-stat minion-health" title="พลังชีวิต">${minion.health}</span>
       `;
-      token.title = `${minion.card.name} (ATK ${minion.atk} / HP ${minion.health}/${minion.maxHealth}) — แตะเพื่อสั่งการหรือดูรายละเอียด`;
+      token.title = `${minion.card.name} (ATK ${effectiveAtk} / HP ${minion.health}/${minion.maxHealth}) — แตะเพื่อสั่งการหรือดูรายละเอียด`;
       container.appendChild(token);
     });
   }
