@@ -88,4 +88,15 @@ if (!cssContent.includes('@media print') || !cssContent.includes('.a4-sheet')) {
 }
 console.log("✓ Print & Play CSS rules verified!");
 
+// Test 5: Verify every card skill.type is implemented in game.js
+console.log("\n[Test 5] Verifying all 31 card skills are wired in game.js...");
+const gameJsContent = fs.readFileSync(path.join(__dirname, 'game.js'), 'utf-8');
+CARDS_DATA.forEach(card => {
+  const casePattern = `case '${card.skill.type}':`;
+  if (!gameJsContent.includes(casePattern)) {
+    throw new Error(`Card #${card.id} (${card.name}) skill type "${card.skill.type}" is missing in game.js!`);
+  }
+});
+console.log(`✓ All ${CARDS_DATA.length} cards have active skill handlers in game.js!`);
+
 console.log("\n=== ALL VERIFICATION TESTS PASSED SUCCESSFULLY! ===");

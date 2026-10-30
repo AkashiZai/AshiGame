@@ -210,7 +210,7 @@ const CARDS_DATA = [
     skill: {
       id: "larva_fart",
       name: "ตดยิงจรวดสลับการ์ด",
-      desc: "ขโมย Energy ฝ่ายตรงข้าม 1 หน่วยมาเป็นของเรา และจั่วการ์ด 1 ใบ",
+      desc: "ขโมย Energy ศัตรู 1 หน่วยในเทิร์นหน้า ฟื้นฟูมานาเรา +2 และจั่วการ์ด 1 ใบ",
       type: "steal_energy",
       drawCount: 1
     },
@@ -308,9 +308,9 @@ const CARDS_DATA = [
     skill: {
       id: "boss_thumbsup",
       name: "ยอดเยี่ยมมากไอ้น้อง",
-      desc: "มอบ Energy พิเศษ +1 หน่วยในเทิร์นนี้ และเพิ่มเกราะ +2",
+      desc: "มอบ Energy พิเศษ +2 หน่วยทันที เพิ่มเกราะ +2 และบัฟมินเนียนฝ่ายเรา +1 ATK",
       type: "grant_energy",
-      energyVal: 1,
+      energyVal: 2,
       shieldVal: 2
     },
     quote: "กดไลก์ให้หนึ่งที งานนี้เสี่ยเลี้ยงเอง เต็มที่ไปเลยวัยรุ่น!",
