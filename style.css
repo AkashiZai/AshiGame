@@ -932,16 +932,16 @@ main {
    -------------------------------------------------------------------------- */
 .duel-clash-stage {
   height: 100%;
-  max-height: 240px;
+  max-height: 310px;
   margin: auto 0;
   align-self: stretch;
   min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  justify-content: space-evenly;
-  gap: 2px;
-  padding: 4px 10px;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 12px;
   border-radius: 16px;
   background:
     radial-gradient(ellipse at center, rgba(255, 241, 204, .25), transparent 66%),
@@ -967,47 +967,57 @@ main {
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
-  gap: 2px;
 }
 
 .lane-caption {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: min(100%, 680px);
-  margin: 0 auto;
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: rgba(28, 19, 12, 0.16);
-  color: #2b180a;
-  font-size: 11px;
+  width: min(100%, 740px);
+  padding: 0 10px;
+  pointer-events: none;
+  z-index: 2;
+  font-size: 10.5px;
   line-height: 1.2;
   font-weight: 800;
   letter-spacing: 0.2px;
 }
 
-.opponent-lane .lane-caption {
-  color: #5c1916;
-  background: rgba(153, 27, 27, 0.1);
+.lane-caption > span {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(28, 19, 12, 0.22);
+  backdrop-filter: blur(2px);
 }
 
-.friendly-lane .lane-caption {
+.opponent-lane .lane-caption > span {
+  color: #5c1916;
+  background: rgba(153, 27, 27, 0.14);
+  border: 1px solid rgba(153, 27, 27, 0.2);
+}
+
+.friendly-lane .lane-caption > span {
   color: #0f3d23;
-  background: rgba(22, 101, 52, 0.12);
+  background: rgba(22, 101, 52, 0.15);
+  border: 1px solid rgba(22, 101, 52, 0.22);
 }
 
 .minion-row {
-  width: min(100%, 720px);
-  min-height: 70px;
+  width: min(100%, 740px);
+  min-height: 98px;
   margin: 0 auto;
-  padding: 4px 12px;
+  padding: 12px 18px 10px;
   border-radius: 14px;
-  background: rgba(255, 248, 231, 0.18);
-  border: 1.5px solid rgba(120, 83, 43, 0.22);
+  background: rgba(255, 248, 231, 0.2);
+  border: 1.5px solid rgba(120, 83, 43, 0.24);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(6px, 1.4vw, 16px);
+  gap: clamp(12px, 2vw, 24px);
   position: relative;
   transition: all 0.2s ease;
 }
@@ -1072,6 +1082,13 @@ main {
   background: rgba(20, 83, 45, 0.92);
   border-color: #4ade80;
   box-shadow: 0 0 14px rgba(74, 222, 128, 0.55), 0 3px 10px rgba(0, 0, 0, 0.6);
+}
+
+.battle-ticker-msg.skill-active {
+  color: #fef08a;
+  background: linear-gradient(90deg, rgba(30, 27, 75, 0.94), rgba(88, 28, 135, 0.94), rgba(30, 27, 75, 0.94));
+  border-color: #facc15;
+  box-shadow: 0 0 16px rgba(250, 204, 21, 0.65), 0 3px 10px rgba(0, 0, 0, 0.6);
 }
 
 /* --------------------------------------------------------------------------
@@ -1171,11 +1188,11 @@ main {
 .minion-token {
   --minion-glow: rgba(120, 232, 164, .85);
   width: 78px;
-  height: 98px;
+  height: 82px;
   flex: 0 0 78px;
   position: relative;
   isolation: isolate;
-  border: 3.5px solid #c18a2a;
+  border: 3px solid #c18a2a;
   border-radius: 50% / 46%;
   background: radial-gradient(ellipse at 50% 26%, #705533 0%, #332216 64%, #100b07 100%);
   box-shadow: inset 0 0 0 2px rgba(255, 231, 159, .35), 0 5px 12px rgba(28, 16, 7, .7);
@@ -1188,13 +1205,13 @@ main {
 
 .minion-token:hover {
   z-index: 10;
-  transform: translateY(-5px) scale(1.08);
+  transform: translateY(-4px) scale(1.07);
   filter: brightness(1.12);
 }
 
 .minion-art {
   position: absolute;
-  inset: 3px 3px 14px;
+  inset: 3px 3px 11px;
   overflow: hidden;
   border-radius: 50% / 46%;
   background: #130e08;
@@ -1210,34 +1227,37 @@ main {
 
 .minion-name {
   position: absolute;
-  left: -8px;
-  right: -8px;
-  bottom: 8px;
-  z-index: 2;
+  left: -4px;
+  right: -4px;
+  bottom: 14px;
+  z-index: 5;
   overflow: hidden;
-  padding: 1px 4px;
-  color: #fff7d2;
-  background: linear-gradient(90deg, transparent, rgba(42, 23, 8, .94) 16%, rgba(42, 23, 8, .94) 84%, transparent);
-  font-size: 10px;
-  line-height: 1.15;
+  padding: 1px 5px;
+  color: #fef3c7;
+  background: rgba(24, 13, 6, 0.92);
+  border: 1px solid rgba(212, 160, 23, 0.55);
+  border-radius: 6px;
+  font-size: 9px;
+  line-height: 1.2;
   font-weight: 800;
   text-align: center;
   white-space: nowrap;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 3px #000;
+  text-shadow: 0 1px 2px #000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.75);
 }
 
 .minion-stat {
   position: absolute;
-  z-index: 4;
-  bottom: -7px;
-  width: 27px;
-  height: 28px;
+  z-index: 6;
+  bottom: -5px;
+  width: 24px;
+  height: 24px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   color: #fff;
-  font-size: 14.5px;
+  font-size: 13px;
   line-height: 1;
   font-weight: 900;
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
@@ -1245,13 +1265,13 @@ main {
 }
 
 .minion-atk {
-  left: -6px;
+  left: -4px;
   border: 2px solid #fff0aa;
   background: radial-gradient(circle at 35% 35%, #fff176, #f59e0b 68%, #92400e);
 }
 
 .minion-health {
-  right: -6px;
+  right: -4px;
   border: 2px solid #ffcdd2;
   border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
   clip-path: polygon(50% 0%, 88% 33%, 100% 68%, 82% 95%, 50% 100%, 18% 95%, 0% 68%, 12% 33%);
@@ -1389,6 +1409,73 @@ main {
   25% { transform: translateX(-8px) rotate(-3deg); filter: brightness(1.7) saturate(1.5); }
   50% { transform: translateX(8px) rotate(3deg); }
   75% { transform: translateX(-4px); }
+}
+
+.minion-token.minion-summoning {
+  animation: minionSummonPop 0.75s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  box-shadow: 0 0 0 3px #fde047, 0 0 26px 8px rgba(250, 204, 21, 0.95);
+}
+
+@keyframes minionSummonPop {
+  0% { transform: scale(0.35) translateY(20px); filter: brightness(1.8); }
+  60% { transform: scale(1.14) translateY(-6px); filter: brightness(1.3); }
+  100% { transform: scale(1) translateY(0); filter: brightness(1); }
+}
+
+.minion-damage-pop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 40px;
+  height: 40px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 35%, #fde047, #ef4444 55%, #991b1b);
+  border: 2px solid #fff;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+  z-index: 30;
+  pointer-events: none;
+  animation: minionDmgFloat 0.85s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+@keyframes minionDmgFloat {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(0.4); }
+  30% { opacity: 1; transform: translate(-50%, -60%) scale(1.25); }
+  100% { opacity: 0; transform: translate(-50%, -120%) scale(0.9); }
+}
+
+.minion-skill-pop {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fef08a 0%, #f59e0b 100%);
+  border: 1.5px solid #fff;
+  color: #1c1008;
+  font-size: 10.5px;
+  font-weight: 900;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.85), 0 0 14px rgba(250, 204, 21, 0.9);
+  z-index: 35;
+  pointer-events: none;
+  animation: minionSkillBannerPop 1.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+@keyframes minionSkillBannerPop {
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); }
+  22% { opacity: 1; transform: translate(-50%, -4px) scale(1.12); }
+  75% { opacity: 1; transform: translate(-50%, -10px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -22px) scale(0.92); }
 }
 
 /* ==========================================================================
