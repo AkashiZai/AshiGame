@@ -6,8 +6,8 @@ console.log("=== RUNNING AUTOMATED VERIFICATION SUITE ===");
 
 // Test 1: Card database verification
 console.log("\n[Test 1] Checking Card Dataset...");
-if (!Array.isArray(CARDS_DATA) || CARDS_DATA.length !== 21) {
-  throw new Error(`Expected exactly 21 cards, but found ${CARDS_DATA.length}`);
+if (!Array.isArray(CARDS_DATA) || CARDS_DATA.length !== 26) {
+  throw new Error(`Expected exactly 26 cards, but found ${CARDS_DATA.length}`);
 }
 console.log(`✓ Card count: ${CARDS_DATA.length}`);
 
@@ -27,7 +27,7 @@ CARDS_DATA.forEach((card, idx) => {
     throw new Error(`Card #${card.id} has invalid/missing properties!`);
   }
 });
-console.log("✓ All 21 card images and data properties verified!");
+console.log(`✓ All ${CARDS_DATA.length} card images and data properties verified!`);
 
 // Test 3: Simulation of damage calculation & skills
 console.log("\n[Test 3] Simulating combat and skills resolution...");

@@ -411,6 +411,104 @@ const CARDS_DATA = [
     },
     quote: "ดาเมจต่อพลังชีวิตยังพอทน แต่ดาเมจต่อสายตา... เกินต้านทาน!",
     image: "images/qwen_edit_20261004_234512.png"
+  },
+  {
+    id: 22,
+    name: "ดาวรุ่งแชมป์ 7 สี เบอร์ 6",
+    sub: "7HD Striker No.6",
+    category: "Support",
+    categoryName: "สายนักเตะขวัญใจ",
+    cost: 3,
+    atk: 3,
+    def: 4,
+    skill: {
+      id: "striker_number_one",
+      name: "ยิงประตูชัยชูนิ้วเดียว",
+      desc: "โจมตีฉับพลัน 2 ดาเมจ และจั่วการ์ดเข้ามือทันที 1 ใบ",
+      type: "quick_draw",
+      dmgVal: 2,
+      drawCount: 1
+    },
+    quote: "เบอร์ 6 ที่อก นิ้วชี้ที่หนึ่ง แชมป์บอล 7 สีปีนี้จองแล้วครับจารย์!",
+    image: "images/22.jpg"
+  },
+  {
+    id: 23,
+    name: "ฟีนิกซ์เพลิงกัลป์ ฉากฟ้า",
+    sub: "Blue Screen Phoenix",
+    category: "Assassin",
+    categoryName: "สายดูเอลลิสต์อัคคี",
+    cost: 4,
+    atk: 4,
+    def: 4,
+    skill: {
+      id: "phoenix_curveball",
+      name: "ลูกไฟแฟลชเข้าตา",
+      desc: "ปาลูกไฟทำดาเมจ 3 หน่วย และทำให้ศัตรูตาบอด การโจมตีถัดไปทำดาเมจได้แค่ 1",
+      type: "blind_enemy",
+      dmgVal: 3
+    },
+    quote: "ระวังตาหน่อยนะเพ่! แฟลชตัวเองไม่พอ เผาเพื่อนร่วมทีมอีกต่างหาก",
+    image: "images/23.jpg"
+  },
+  {
+    id: 24,
+    name: "ริคาร์โด้ ผ้าโพกหัวในตำนาน",
+    sub: "Ricardo Legend Dancer",
+    category: "Tank",
+    categoryName: "สายกล้าม/ยั่วยุ",
+    cost: 4,
+    atk: 3,
+    def: 6,
+    skill: {
+      id: "ricardo_flick",
+      name: "สเต็ปแดนซ์สะกดวิญญาณ",
+      desc: "ได้รับเกราะป้องกัน +3 หน่วย และสะท้อนดาเมจ 2 หน่วยใส่ศัตรูทันที",
+      type: "shield_reflect",
+      shieldVal: 3,
+      dmgVal: 2
+    },
+    quote: "แค่หันมายิ้มมุมปาก... ทั้งสนามก็พร้อมหยุดสู้แล้วเต้นตาม",
+    image: "images/24.png"
+  },
+  {
+    id: 25,
+    name: "ขวาพิฆาต แขนเดียวเสียวทั้งบาง",
+    sub: "One-Arm Titan",
+    category: "Fighter",
+    categoryName: "สายฟาร์มแขนขวา",
+    cost: 4,
+    atk: 5,
+    def: 3,
+    skill: {
+      id: "right_arm_smash",
+      name: "หมัดเดียวรู้เรื่อง",
+      desc: "โจมตีทะลุเกราะป้องกันศัตรูโดยตรง (True Damage 3 หน่วย)",
+      type: "true_damage",
+      dmgVal: 3
+    },
+    quote: "ไม่ต้องถามว่าทำไมแขนขวาใหญ่กว่าแขนซ้าย... ยกดัมเบลข้างเดียวล้วนๆ!",
+    image: "images/25.png"
+  },
+  {
+    id: 26,
+    name: "ร็อกเกอร์พี่เสก โซโล่สายฟ้า",
+    sub: "Loso Rock Legend",
+    category: "Chaos",
+    categoryName: "สายร็อกแอนด์โรล",
+    cost: 4,
+    atk: 4,
+    def: 4,
+    skill: {
+      id: "loso_guitar_solo",
+      name: "โซโล่กีตาร์สะกดคนดู",
+      desc: "สาดคลื่นเสียงทำดาเมจ 2 หน่วย และลดพลังโจมตีศัตรู -2 ในเทิร์นถัดไป",
+      type: "damage_weaken",
+      dmgVal: 2,
+      weakenVal: 2
+    },
+    quote: "ถึงจะดูโซซัดโซเซ แต่พอจับกีตาร์ขึ้นเวที... พี่เล่นเต็มร้อยเสมอ!",
+    image: "images/26.jpg"
   }
 ];
 
