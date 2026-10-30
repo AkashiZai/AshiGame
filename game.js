@@ -1865,13 +1865,30 @@ class MemeGame {
     badges.push(isTurn
       ? `<span class="status-pill turn-active">⚔️ กำลังเล่น</span>`
       : `<span class="status-pill turn-wait">⏳ รอเทิร์น</span>`);
-    if (player.shield > 0) badges.push(`<span class="status-pill buff-shield">🛡️ เกราะ +${player.shield}</span>`);
-    if (player.poison > 0) badges.push(`<span class="status-pill debuff-poison">🧪 พิษ -${player.poison}</span>`);
-    if (player.weaken > 0) badges.push(`<span class="status-pill debuff-weaken">📉 อ่อนแอ -${player.weaken}</span>`);
-    if (player.silenced) badges.push(`<span class="status-pill debuff-silence">🤫 ใบ้สกิล</span>`);
-    if (player.blinded) badges.push(`<span class="status-pill debuff-blind">😎 ตาบอด</span>`);
-    if (player.energyLock > 0) badges.push(`<span class="status-pill debuff-weaken">⚡ มานา -${player.energyLock}</span>`);
+    if (player.shield > 0) badges.push(`<span class="status-pill buff-shield" title="ดูดซับดาเมจแทนเลือด">🛡️ เกราะ +${player.shield}</span>`);
+    if (player.poison > 0) badges.push(`<span class="status-pill debuff-poison" title="เสีย HP ต้นเทิร์น">🧪 พิษ -${player.poison}</span>`);
+    if (player.weaken > 0) badges.push(`<span class="status-pill debuff-weaken" title="พลังโจมตีลดลง">📉 อ่อนแอ -${player.weaken}</span>`);
+    if (player.silenced) badges.push(`<span class="status-pill debuff-silence" title="สกิลอัญเชิญใบถัดไปไม่ทำงาน">🤫 ใบ้สกิล</span>`);
+    if (player.blinded) badges.push(`<span class="status-pill debuff-blind" title="การโจมตีครั้งถัดไปทำดาเมจได้แค่ 1">😎 ตาบอด (ATK=1)</span>`);
+    if (player.energyLock > 0) badges.push(`<span class="status-pill debuff-weaken" title="มานาเทิร์นหน้าลดลง">⚡ มานา -${player.energyLock}</span>`);
     return badges.join('');
+  }
+
+  describeActiveStatuses(player) {
+    const items = [];
+    if (player.shield > 0) items.push(`🛡️ เกราะป้องกัน +${player.shield}`);
+    if (player.poison > 0) items.push(`🧪 ติดพิษ (-${player.poison} HP ต้นเทิร์น)`);
+    if (player.weaken > 0) items.push(`📉 อ่อนแอ (โจมตี -${player.weaken})`);
+    if (player.silenced) items.push(`🤫 ติดใบ้ (สกิลใบถัดไปไม่ทำงาน)`);
+    if (player.blinded) items.push(`😎 ตาบอด (ตีครั้งถัดไปเหลือ 1)`);
+    if (player.energyLock > 0) items.push(`⚡ มานาล็อก (-${player.energyLock} เทิร์นหน้า)`);
+    const tauntCount = (player.board || []).filter((m) => m.taunt).length;
+    if (tauntCount > 0) items.push(`🛡️ มียั่วยุ ${tauntCount} ตัวบนสนาม`);
+    return {
+      hasEffects: items.length > 0,
+      hasDebuff: Boolean(player.poison > 0 || player.weaken > 0 || player.silenced || player.blinded || player.energyLock > 0),
+      text: items.length > 0 ? items.join(' • ') : '✅ ปกติ (ไม่มีผลสถานะ)'
+    };
   }
 
   getIdleGuidance(myPlayer, oppPlayer, isMyTurn) {
@@ -1922,6 +1939,14 @@ class MemeGame {
     if (p1StatusBadges) {
       p1StatusBadges.innerHTML = this.renderStatusBadges(myPlayer, isMyTurn);
     }
+    const myStatusInfo = this.describeActiveStatuses(myPlayer);
+    const p1StatusSummaryText = document.getElementById('p1StatusSummaryText');
+    const p1HeroStatusBanner = document.getElementById('p1HeroStatusBanner');
+    if (p1StatusSummaryText) p1StatusSummaryText.innerText = myStatusInfo.text;
+    if (p1HeroStatusBanner) {
+      p1HeroStatusBanner.classList.toggle('has-effects', myStatusInfo.hasEffects);
+      p1HeroStatusBanner.classList.toggle('has-debuff', myStatusInfo.hasDebuff);
+    }
     
     if (this.p1ShieldText) {
       if (myPlayer.shield > 0) {
@@ -1950,6 +1975,14 @@ class MemeGame {
     const p2StatusBadges = document.getElementById('p2StatusBadges');
     if (p2StatusBadges) {
       p2StatusBadges.innerHTML = this.renderStatusBadges(oppPlayer, !isMyTurn);
+    }
+    const oppStatusInfo = this.describeActiveStatuses(oppPlayer);
+    const p2StatusSummaryText = document.getElementById('p2StatusSummaryText');
+    const p2HeroStatusBanner = document.getElementById('p2HeroStatusBanner');
+    if (p2StatusSummaryText) p2StatusSummaryText.innerText = oppStatusInfo.text;
+    if (p2HeroStatusBanner) {
+      p2HeroStatusBanner.classList.toggle('has-effects', oppStatusInfo.hasEffects);
+      p2HeroStatusBanner.classList.toggle('has-debuff', oppStatusInfo.hasDebuff);
     }
     
     if (this.p2ShieldText) {
@@ -2028,10 +2061,10 @@ class MemeGame {
     this.renderMinions(myPlayer, this.p1BoardZone, myKey);
     this.renderMinions(oppPlayer, this.p2BoardZone, oppKey);
 
-    const myTotalAtk = myPlayer.board.reduce((sum, m) => sum + Math.max(1, m.atk - (myPlayer.weaken || 0)), 0);
-    const oppTotalAtk = oppPlayer.board.reduce((sum, m) => sum + Math.max(1, m.atk - (oppPlayer.weaken || 0)), 0);
-    document.getElementById('p1MinionCount').innerText = `${myPlayer.board.length}/7 ตัว • รวมพลังโจมตี ${myTotalAtk}`;
-    document.getElementById('p2MinionCount').innerText = `${oppPlayer.board.length}/7 ตัว • รวมพลังโจมตี ${oppTotalAtk}`;
+    const myTotalAtk = myPlayer.board.reduce((sum, m) => sum + (myPlayer.blinded ? 1 : Math.max(1, m.atk - (myPlayer.weaken || 0))), 0);
+    const oppTotalAtk = oppPlayer.board.reduce((sum, m) => sum + (oppPlayer.blinded ? 1 : Math.max(1, m.atk - (oppPlayer.weaken || 0))), 0);
+    document.getElementById('p1MinionCount').innerText = `${myPlayer.board.length}/7 ตัว • รวมโจมตี ${myTotalAtk}${myStatusInfo.hasEffects ? ` • ${myStatusInfo.text}` : ''}`;
+    document.getElementById('p2MinionCount').innerText = `${oppPlayer.board.length}/7 ตัว • รวมโจมตี ${oppTotalAtk}${oppStatusInfo.hasEffects ? ` • ${oppStatusInfo.text}` : ''}`;
 
     if (this.selectedAttacker) {
       const unit = this[this.selectedAttacker.playerKey].board.find((entry) => entry.id === this.selectedAttacker.minionId);

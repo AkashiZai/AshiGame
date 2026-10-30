@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -110,6 +110,12 @@
           <!-- Opponent Cards (Upside down card backs) -->
           <div id="p2HandZone" class="enemy-hand-strip"></div>
 
+          <!-- Opponent Live Status Text Box (Right of Hero) -->
+          <div id="p2HeroStatusBanner" class="hero-status-callout opponent-callout">
+            <span class="callout-label">สถานะอีกฝั่ง:</span>
+            <span id="p2StatusSummaryText" class="callout-text">✅ ปกติ (ไม่มีดีบัฟ)</span>
+          </div>
+
           <!-- Opponent Mana Crystals -->
           <div class="mana-tray">
             <div class="mana-counter-label" title="มานาของฝ่ายตรงข้าม">
@@ -188,6 +194,12 @@
               <div id="p1HpText" class="health-orb" title="พลังชีวิต (HP)">30</div>
               <div id="p1ShieldText" class="armor-crest hidden" title="เกราะ (Shield)">0</div>
             </div>
+          </div>
+
+          <!-- Player Live Status Text Box (Right of Hero) -->
+          <div id="p1HeroStatusBanner" class="hero-status-callout player-callout">
+            <span class="callout-label">สถานะของคุณ:</span>
+            <span id="p1StatusSummaryText" class="callout-text">✅ ปกติ (ไม่มีดีบัฟ)</span>
           </div>
 
           <!-- Player Mana Tray -->
@@ -420,7 +432,7 @@
   </div>
 
   <script src="peerjs.min.js"></script>
-  <script src="cards.js?v=4"></script>
-  <script src="game.js?v=4"></script>
+  <script src="cards.js?v=5"></script>
+  <script src="game.js?v=5"></script>
 </body>
 </html>
