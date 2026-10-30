@@ -509,6 +509,104 @@ const CARDS_DATA = [
     },
     quote: "ถึงจะดูโซซัดโซเซ แต่พอจับกีตาร์ขึ้นเวที... พี่เล่นเต็มร้อยเสมอ!",
     image: "images/26.jpg"
+  },
+  {
+    id: 27,
+    name: "หัวหน้าแก๊งช่างกล ล้อทองขอบ 17",
+    sub: "Garage Gang Leader",
+    category: "Fighter",
+    categoryName: "สายเด็กช่าง/แว้น",
+    cost: 3,
+    atk: 4,
+    def: 3,
+    skill: {
+      id: "wave_rev_burst",
+      name: "เบิ้ลเครื่องท่อผ่าสะท้านซอย",
+      desc: "พุ่งชนทำดาเมจ 3 หน่วยใส่ศัตรู (ตัวเองรับแรงสะท้อน 1 ดาเมจ)",
+      type: "recoil_attack",
+      extraDmg: 3,
+      selfDmg: 1
+    },
+    quote: "เวฟลูกเดิม เพิ่มเติมคือล้อทอง... มีเรื่องบอกช่าง เดี๋ยวจัดให้ทั้งอู่!",
+    image: "images/27.jpg"
+  },
+  {
+    id: 28,
+    name: "เจ้าหญิงทไวไลท์ มหาเวทย์โพนี่",
+    sub: "Princess Twilight Sparkle",
+    category: "Support",
+    categoryName: "สายเวทมนตร์มิตรภาพ",
+    cost: 4,
+    atk: 3,
+    def: 5,
+    skill: {
+      id: "friendship_magic",
+      name: "มนตราแห่งมิตรภาพ",
+      desc: "ทำดาเมจ 2 หน่วย และ 'ใบ้' สกิลพิเศษของศัตรูในเทิร์นถัดไป",
+      type: "silence_skill",
+      dmgVal: 2
+    },
+    quote: "มิตรภาพคือเวทมนตร์... แต่ถ้าเพื่อนไม่คืนตังค์ เวทมนตร์ก็ช่วยไม่ได้นะจ๊ะ",
+    image: "images/28.jpg"
+  },
+  {
+    id: 29,
+    name: "น้องบับเบิลส์ พาวเวอร์พัฟกล้าม",
+    sub: "Powerpuff Bubbles",
+    category: "Support",
+    categoryName: "สายแบ๊วพิทักษ์โลก",
+    cost: 3,
+    atk: 2,
+    def: 5,
+    skill: {
+      id: "sweet_bubble_charm",
+      name: "ฟองสบู่นุ่มนิ่มสะกดใจ",
+      desc: "ทำให้ศัตรูง่วงนอน ลดพลังโจมตี -2 ในเทิร์นถัดไป และฟื้นฟู HP 3",
+      type: "weaken_heal",
+      weakenVal: 2,
+      healVal: 3
+    },
+    quote: "น้ำตาล เครื่องเทศ และสารพัดของกุ๊กกิ๊ก... แต่หมัดหนูหนักนะพี่!",
+    image: "images/29.jpg"
+  },
+  {
+    id: 30,
+    name: "เจ้าป่ามงกุฎเถาวัลย์",
+    sub: "Jungle Vine Shaman",
+    category: "Chaos",
+    categoryName: "สายคนป่า/สมุนไพร",
+    cost: 3,
+    atk: 3,
+    def: 4,
+    skill: {
+      id: "jungle_seed_toxin",
+      name: "พิษลูกไม้ป่าดงดิบ",
+      desc: "สร้างความเสียหาย 2 หน่วย และทำให้ศัตรูติดพิษสะสม 2 หน่วย",
+      type: "poison_drain",
+      dmgVal: 2,
+      poisonVal: 2
+    },
+    quote: "อยู่กับธรรมชาติ สวมสร้อยลูกไม้... ใครบุกรุกป่าต้องเจอยาพิษสูตรโบราณ!",
+    image: "images/30.png"
+  },
+  {
+    id: 31,
+    name: "เทพมารบลูสกรีน ร่างมืดตากแดด",
+    sub: "Dark Sunburn Blue Boy",
+    category: "Assassin",
+    categoryName: "สายร่างมืดดูดพลัง",
+    cost: 3,
+    atk: 3,
+    def: 4,
+    skill: {
+      id: "dark_uv_drain",
+      name: "ดูดแสงแดดคืนชีพ",
+      desc: "โจมตีทำดาเมจ 2 หน่วย และดูดเลือดกลับมาฟื้นฟู HP ตัวเอง +2",
+      type: "lifesteal",
+      dmgVal: 2
+    },
+    quote: "จากเทพบุตรหน้าใส ไปเตะบอลตากแดดวันเดียว... กลายเป็นร่างมืดเฉยเลย!",
+    image: "images/31.png"
   }
 ];
 

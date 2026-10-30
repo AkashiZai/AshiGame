@@ -6,8 +6,8 @@ console.log("=== RUNNING AUTOMATED VERIFICATION SUITE ===");
 
 // Test 1: Card database verification
 console.log("\n[Test 1] Checking Card Dataset...");
-if (!Array.isArray(CARDS_DATA) || CARDS_DATA.length !== 26) {
-  throw new Error(`Expected exactly 26 cards, but found ${CARDS_DATA.length}`);
+if (!Array.isArray(CARDS_DATA) || CARDS_DATA.length !== 31) {
+  throw new Error(`Expected exactly 31 cards, but found ${CARDS_DATA.length}`);
 }
 console.log(`✓ Card count: ${CARDS_DATA.length}`);
 
