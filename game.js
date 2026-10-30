@@ -1033,32 +1033,38 @@ class MemeGame {
     }
   }
 
-  openCardAction(card, playerKey) {
+  openCardAction(card, playerKey, options = {}) {
     if (this.gameOver) return;
-    if (this.isMultiplayer && playerKey !== this.getMyPlayerKey()) return;
+    const { onBoard = false, minion = null } = options;
+    if (!onBoard && this.isMultiplayer && playerKey !== this.getMyPlayerKey()) return;
 
     const player = playerKey === 'p1' ? this.p1 : this.p2;
     const isMyTurn = this.turn === playerKey && !this.isBotThinking;
     const hasMana = player.energy >= card.cost;
     const hasSpace = player.board.length < 7;
-    const canSummon = isMyTurn && hasMana && hasSpace;
+    const canSummon = !onBoard && isMyTurn && hasMana && hasSpace;
 
     this.pendingCard = canSummon ? { card, playerKey } : null;
 
     // Populate modal preview
     document.getElementById('actionModalImg').src = card.image;
     document.getElementById('actionModalTitle').innerText = card.name;
-    document.getElementById('actionModalSub').innerText = card.sub;
+    document.getElementById('actionModalSub').innerText = `${card.sub} • สาย ${card.category}`;
     document.getElementById('actionModalCost').innerText = card.cost;
-    document.getElementById('actionModalAtk').innerText = card.atk;
-    document.getElementById('actionModalDef').innerText = card.def;
+    document.getElementById('actionModalAtk').innerText = minion ? minion.atk : card.atk;
+    document.getElementById('actionModalDef').innerText = minion ? `${minion.health}/${minion.maxHealth}` : card.def;
     document.getElementById('actionModalSkill').innerText = `${card.skill.name}: ${card.skill.desc}`;
     document.getElementById('actionModalQuote').innerText = `"${card.quote}"`;
 
     const summonBtn = document.getElementById('actSummonBtn');
     if (summonBtn) {
       summonBtn.disabled = !canSummon;
-      if (canSummon) {
+      if (onBoard && minion) {
+        const statusText = minion.summoningSick
+          ? '💤 เพิ่งอัญเชิญลงสนาม (เริ่มโจมตีได้ในเทิร์นถัดไป)'
+          : (minion.canAttack ? '⚔️ พร้อมโจมตีในเทิร์นนี้' : '✓ โจมตีไปแล้วในเทิร์นนี้');
+        summonBtn.innerHTML = `<span>🔍 ข้อมูลมินเนียนบนสนาม</span><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">${statusText}</span>`;
+      } else if (canSummon) {
         summonBtn.innerHTML = `<span>⚡ อัญเชิญลงสนาม (${card.cost} มานา)</span><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">เริ่มโจมตีได้ในเทิร์นถัดไป</span>`;
       } else if (!isMyTurn) {
         summonBtn.innerHTML = `<span>⏳ รอเทิร์นของคุณ</span>`;
@@ -1162,10 +1168,16 @@ class MemeGame {
       return;
     }
 
-    if (playerKey !== this.turn || !minion.canAttack || this.gameOver) return;
+    if (playerKey !== this.turn || !minion.canAttack || this.gameOver) {
+      if (playerKey === this.turn && minion.summoningSick) {
+        this.addLog(`💤 "${minion.card.name}" เพิ่งลงสนาม — เริ่มโจมตีได้ในเทิร์นถัดไป`);
+      }
+      this.openCardAction(minion.card, playerKey, { onBoard: true, minion });
+      return;
+    }
     this.selectedAttacker = { playerKey, minionId };
     this.updateUI();
-    this.addLog(`เลือก ${minion.card.name} แล้ว — แตะมินเนียนศัตรูหรือฮีโร่เพื่อโจมตี`);
+    this.addLog(`🎯 เลือก "${minion.card.name}" แล้ว — แตะมินเนียนศัตรูหรือฮีโร่เพื่อโจมตี`);
   }
 
   handleHeroTarget(position) {
@@ -1622,17 +1634,67 @@ class MemeGame {
     }
   }
 
+  renderStatusBadges(player, isTurn) {
+    const badges = [];
+    badges.push(isTurn
+      ? `<span class="status-pill turn-active">⚔️ กำลังเล่น</span>`
+      : `<span class="status-pill turn-wait">⏳ รอเทิร์น</span>`);
+    if (player.shield > 0) badges.push(`<span class="status-pill buff-shield">🛡️ เกราะ +${player.shield}</span>`);
+    if (player.poison > 0) badges.push(`<span class="status-pill debuff-poison">🧪 พิษ -${player.poison}</span>`);
+    if (player.weaken > 0) badges.push(`<span class="status-pill debuff-weaken">📉 อ่อนแอ -${player.weaken}</span>`);
+    if (player.silenced) badges.push(`<span class="status-pill debuff-silence">🤫 ใบ้สกิล</span>`);
+    if (player.blinded) badges.push(`<span class="status-pill debuff-blind">😎 ตาบอด</span>`);
+    return badges.join('');
+  }
+
+  getIdleGuidance(myPlayer, oppPlayer, isMyTurn) {
+    if (!isMyTurn) {
+      return `⏳ เทิร์นของ ${oppPlayer.name} — รออีกฝ่ายสั่งการสักครู่...`;
+    }
+    const playableCount = myPlayer.board.length < 7
+      ? myPlayer.hand.filter((c) => c.cost <= myPlayer.energy).length
+      : 0;
+    const readyCount = myPlayer.board.filter((m) => m.canAttack).length;
+    if (playableCount > 0 && readyCount > 0) {
+      return `💡 ลงการ์ดได้ ${playableCount} ใบ • มินเนียนพร้อมโจมตี ${readyCount} ตัว (แตะกรอบสีเขียวเพื่อสั่งการ)`;
+    }
+    if (playableCount > 0) {
+      return `💡 มีมานา ${myPlayer.energy}/${myPlayer.maxEnergy} — ลงการ์ดขอบสีเขียวได้ ${playableCount} ใบ`;
+    }
+    if (readyCount > 0) {
+      return `⚔️ มีมินเนียนพร้อมโจมตี ${readyCount} ตัว — แตะมินเนียนของคุณแล้วเลือกเป้าหมาย`;
+    }
+    return `✅ ไม่มีแอคชันเหลือในเทิร์นนี้ — กดปุ่ม "จบเทิร์น" ด้านขวาได้เลย!`;
+  }
+
   updateUI() {
     const myKey = this.getMyPlayerKey();
     const oppKey = this.getOpponentPlayerKey();
 
     const myPlayer = this[myKey];
     const oppPlayer = this[oppKey];
+    const isMyTurn = (this.turn === myKey);
 
     // Update Bottom Stats (My Hero)
     this.p1Name.innerText = myPlayer.name;
     this.p1HpText.innerText = `${myPlayer.hp}`;
-    if (this.p1HpFill) this.p1HpFill.style.width = `${(myPlayer.hp / myPlayer.maxHp) * 100}%`;
+    const myHpPct = Math.max(0, Math.min(100, (myPlayer.hp / myPlayer.maxHp) * 100));
+    if (this.p1HpFill) {
+      this.p1HpFill.style.width = `${myHpPct}%`;
+      this.p1HpFill.dataset.state = myHpPct <= 30 ? 'low' : (myHpPct <= 60 ? 'mid' : 'high');
+    }
+    const p1HpBarLabel = document.getElementById('p1HpBarLabel');
+    if (p1HpBarLabel) {
+      p1HpBarLabel.innerText = `❤️ ${myPlayer.hp}/${myPlayer.maxHp} HP${myPlayer.shield > 0 ? ` (🛡️+${myPlayer.shield})` : ''}`;
+    }
+    const p1SubStatus = document.getElementById('p1SubStatus');
+    if (p1SubStatus) {
+      p1SubStatus.innerText = `🃏 มือ ${myPlayer.hand.length}/7 • 📚 สำรับ ${myPlayer.deck.length}`;
+    }
+    const p1StatusBadges = document.getElementById('p1StatusBadges');
+    if (p1StatusBadges) {
+      p1StatusBadges.innerHTML = this.renderStatusBadges(myPlayer, isMyTurn);
+    }
     
     if (this.p1ShieldText) {
       if (myPlayer.shield > 0) {
@@ -1649,7 +1711,19 @@ class MemeGame {
     // Update Top Stats (Opponent Hero)
     this.p2Name.innerText = oppPlayer.name;
     this.p2HpText.innerText = `${oppPlayer.hp}`;
-    if (this.p2HpFill) this.p2HpFill.style.width = `${(oppPlayer.hp / oppPlayer.maxHp) * 100}%`;
+    const oppHpPct = Math.max(0, Math.min(100, (oppPlayer.hp / oppPlayer.maxHp) * 100));
+    if (this.p2HpFill) {
+      this.p2HpFill.style.width = `${oppHpPct}%`;
+      this.p2HpFill.dataset.state = oppHpPct <= 30 ? 'low' : (oppHpPct <= 60 ? 'mid' : 'high');
+    }
+    const p2HpBarLabel = document.getElementById('p2HpBarLabel');
+    if (p2HpBarLabel) {
+      p2HpBarLabel.innerText = `❤️ ${oppPlayer.hp}/${oppPlayer.maxHp} HP${oppPlayer.shield > 0 ? ` (🛡️+${oppPlayer.shield})` : ''}`;
+    }
+    const p2StatusBadges = document.getElementById('p2StatusBadges');
+    if (p2StatusBadges) {
+      p2StatusBadges.innerHTML = this.renderStatusBadges(oppPlayer, !isMyTurn);
+    }
     
     if (this.p2ShieldText) {
       if (oppPlayer.shield > 0) {
@@ -1661,7 +1735,12 @@ class MemeGame {
     }
     if (this.p2ShieldFill) this.p2ShieldFill.style.width = `${Math.min(100, (oppPlayer.shield / 20) * 100)}%`;
     this.p2EnergyText.innerText = `${oppPlayer.energy}/${oppPlayer.maxEnergy}`;
-    if (this.p2DeckCount) this.p2DeckCount.innerText = `${oppPlayer.deck.length} ใบในสำรับ`;
+    if (this.p2DeckCount) this.p2DeckCount.innerText = `🃏 มือ ${oppPlayer.hand.length}/7 • 📚 สำรับ ${oppPlayer.deck.length}`;
+
+    const graveyardCount = document.getElementById('graveyardCount');
+    if (graveyardCount) {
+      graveyardCount.innerText = `${myPlayer.discard.length + oppPlayer.discard.length}`;
+    }
 
     // Energy Crystals Bottom (My Hero)
     this.p1EnergyOrbs.innerHTML = '';
@@ -1679,37 +1758,41 @@ class MemeGame {
       this.p2EnergyOrbs.appendChild(gem);
     }
 
-    // Turn Highlights
+    // Turn Highlights & End Turn Smart Readiness
     const p1Wrap = document.getElementById('p1HeroWrap');
     const p2Wrap = document.getElementById('p2HeroWrap');
-
-    const isMyTurn = (this.turn === myKey);
+    const playableCount = myPlayer.board.length < 7
+      ? myPlayer.hand.filter((c) => c.cost <= myPlayer.energy).length
+      : 0;
+    const readyCount = myPlayer.board.filter((m) => m.canAttack).length;
+    const noActionsLeft = isMyTurn && playableCount === 0 && readyCount === 0;
 
     if (isMyTurn) {
-      this.turnBanner.innerText = `⚔️ เทิร์นของคุณ! (${myPlayer.name})`;
+      this.turnBanner.innerText = `⚔️ เทิร์นที่ ${this.p1TurnCount} • ตาของคุณ (${myPlayer.name})`;
       this.turnBanner.style.borderColor = '#22c55e';
       this.turnBanner.style.color = '#4ade80';
       if (p1Wrap) p1Wrap.classList.add('active-turn');
       if (p2Wrap) p2Wrap.classList.remove('active-turn');
       this.endTurnBtn.disabled = false;
       this.endTurnBtn.classList.remove('disabled');
-      this.endTurnBtn.innerHTML = `<span>จบเทิร์น<br><small style="font-size:9.5px;letter-spacing:1px;opacity:0.9;">END TURN</small></span>`;
+      this.endTurnBtn.classList.toggle('all-actions-done', noActionsLeft);
+      this.endTurnBtn.innerHTML = noActionsLeft
+        ? `<span>จบเทิร์น ✓<br><small style="font-size:9px;letter-spacing:0.5px;opacity:0.95;">ครบแอคชันแล้ว</small></span>`
+        : `<span>จบเทิร์น<br><small style="font-size:9.5px;letter-spacing:1px;opacity:0.9;">END TURN</small></span>`;
     } else {
-      this.turnBanner.innerText = `⏳ เทิร์นของ ${oppPlayer.name}`;
+      this.turnBanner.innerText = `⏳ เทิร์นที่ ${this.p1TurnCount} • ตาของ ${oppPlayer.name}`;
       this.turnBanner.style.borderColor = 'var(--gold-dark)';
       this.turnBanner.style.color = 'var(--gold-highlight)';
       if (p1Wrap) p1Wrap.classList.remove('active-turn');
       if (p2Wrap) p2Wrap.classList.add('active-turn');
       this.endTurnBtn.disabled = true;
       this.endTurnBtn.classList.add('disabled');
+      this.endTurnBtn.classList.remove('all-actions-done');
       this.endTurnBtn.innerHTML = `<span>เทิร์นศัตรู<br><small style="font-size:9.5px;letter-spacing:1px;opacity:0.85;">ENEMY TURN</small></span>`;
     }
 
     // Render Hands
-    // Bottom: My Hand (Face Up with Artwork)
     this.renderHand(myPlayer, this.p1HandZone, myKey, false);
-
-    // Top: Opponent Hand (Card Backs - Completely Hidden in Multiplayer & Bot Mode!)
     const isOpponentHidden = this.isMultiplayer || (this.mode === 'bot');
     this.renderHand(oppPlayer, this.p2HandZone, oppKey, isOpponentHidden);
 
@@ -1717,8 +1800,12 @@ class MemeGame {
     this.p2BoardZone.dataset.playerKey = oppKey;
     this.renderMinions(myPlayer, this.p1BoardZone, myKey);
     this.renderMinions(oppPlayer, this.p2BoardZone, oppKey);
-    document.getElementById('p1MinionCount').innerText = `${myPlayer.board.length}/7`;
-    document.getElementById('p2MinionCount').innerText = `${oppPlayer.board.length}/7`;
+
+    const myTotalAtk = myPlayer.board.reduce((sum, m) => sum + m.atk, 0);
+    const oppTotalAtk = oppPlayer.board.reduce((sum, m) => sum + m.atk, 0);
+    document.getElementById('p1MinionCount').innerText = `${myPlayer.board.length}/7 ตัว • รวมพลังโจมตี ${myTotalAtk}`;
+    document.getElementById('p2MinionCount').innerText = `${oppPlayer.board.length}/7 ตัว • รวมพลังโจมตี ${oppTotalAtk}`;
+
     if (this.selectedAttacker) {
       const unit = this[this.selectedAttacker.playerKey].board.find((entry) => entry.id === this.selectedAttacker.minionId);
       const targetBoard = this.selectedAttacker.playerKey === myKey ? this.p2BoardZone : this.p1BoardZone;
@@ -1730,15 +1817,13 @@ class MemeGame {
       this.p1HeroWrap.classList.toggle('valid-target', tauntTokens.length === 0 && targetHero === this.p1HeroWrap);
       this.p2HeroWrap.classList.toggle('valid-target', tauntTokens.length === 0 && targetHero === this.p2HeroWrap);
       this.battleTickerMsg.innerText = unit
-        ? `เลือก ${unit.card.name} แล้ว — แตะมินเนียนศัตรูหรือฮีโร่เพื่อโจมตี`
-        : 'เลือกมินเนียนพร้อมโจมตี แล้วแตะเป้าหมาย';
+        ? `🎯 เลือก "${unit.card.name}" (ATK ${unit.atk}) — แตะเป้าหมายกรอบสีแดงเพื่อโจมตี (แตะซ้ำเพื่อยกเลิก)`
+        : '🎯 เลือกมินเนียนพร้อมโจมตี แล้วแตะเป้าหมาย';
       this.battleTickerMsg.classList.add('targeting');
     } else {
       this.p1HeroWrap.classList.remove('valid-target');
       this.p2HeroWrap.classList.remove('valid-target');
-      this.battleTickerMsg.innerText = this.tickerFlashMsg || (this.turn === myKey
-        ? 'แตะการ์ดบนมือเพื่อดูสกิล/อัญเชิญ หรือลากการ์ดลงสนาม'
-        : `${oppPlayer.name} กำลังเล่นเทิร์น...`);
+      this.battleTickerMsg.innerText = this.tickerFlashMsg || this.getIdleGuidance(myPlayer, oppPlayer, isMyTurn);
       this.battleTickerMsg.classList.remove('targeting');
     }
   }
@@ -1825,29 +1910,52 @@ class MemeGame {
 
   renderMinions(player, container, playerKey) {
     container.innerHTML = '';
+    const isFriendly = playerKey === this.getMyPlayerKey();
+
+    if (player.board.length === 0) {
+      const emptyHint = document.createElement('div');
+      emptyHint.className = 'lane-empty-hint';
+      emptyHint.innerText = isFriendly
+        ? '✨ ยังไม่มีมินเนียนของคุณ — แตะหรือลากการ์ดขอบสีเขียวลงสนามเพื่ออัญเชิญ'
+        : 'สนามฝ่ายตรงข้ามว่างเปล่า — มินเนียนของคุณโจมตีฮีโร่ศัตรูได้โดยตรง';
+      container.appendChild(emptyHint);
+      return;
+    }
+
     player.board.forEach((minion) => {
       const token = document.createElement('button');
       token.type = 'button';
       token.className = 'minion-token';
       token.dataset.minionId = minion.id;
       token.dataset.playerKey = playerKey;
-      token.draggable = minion.canAttack && this.turn === playerKey;
-      if (minion.canAttack && this.turn === playerKey) token.classList.add('can-attack');
+      const isReady = minion.canAttack && this.turn === playerKey;
+      token.draggable = isReady;
+      if (isReady) token.classList.add('can-attack');
+      if (minion.summoningSick) token.classList.add('is-sleeping');
       if (minion.taunt) token.classList.add('has-taunt');
+      if (minion.health < minion.maxHealth) token.classList.add('is-damaged');
       if (this.selectedAttacker?.minionId === minion.id && this.selectedAttacker?.playerKey === playerKey) {
         token.classList.add('is-selected');
+      }
+
+      let badgeHtml = '';
+      if (minion.taunt) {
+        badgeHtml = `<span class="minion-taunt">🛡️ ยั่วยุ</span>`;
+      } else if (isReady) {
+        badgeHtml = `<span class="minion-ready-tag">⚔️ พร้อมตี</span>`;
+      } else if (minion.summoningSick) {
+        badgeHtml = `<span class="minion-sleep-tag" title="เพิ่งอัญเชิญ เริ่มโจมตีได้ในเทิร์นถัดไป">💤 รอเทิร์นหน้า</span>`;
       }
 
       token.innerHTML = `
         <span class="minion-aura"></span>
         <span class="minion-art"><img src="${minion.card.image}" alt="" draggable="false" /></span>
-        ${minion.taunt ? '<span class="minion-taunt">TAUNT</span>' : ''}
+        ${badgeHtml}
         <span class="minion-name">${minion.card.name}</span>
-        <span class="minion-stat minion-atk">${minion.atk}</span>
-        <span class="minion-stat minion-health">${minion.health}</span>
-        ${minion.summoningSick ? '<span class="sleeping-mark" title="เทิร์นนี้ยังโจมตีไม่ได้">☾</span>' : ''}
+        <span class="minion-stat minion-atk" title="พลังโจมตี">${minion.atk}</span>
+        <span class="minion-stat minion-health" title="พลังชีวิต">${minion.health}</span>
       `;
-      token.title = `${minion.card.name} — ATK ${minion.atk} / HP ${minion.health}${minion.taunt ? ' / Taunt' : ''}`;
+      token.title = `${minion.card.name} (ATK ${minion.atk} / HP ${minion.health}/${minion.maxHealth}) — แตะเพื่อสั่งการหรือดูรายละเอียด`;
       container.appendChild(token);
     });
   }

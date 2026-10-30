@@ -86,8 +86,15 @@
         <!-- Opponent Hero Bar (Top) -->
         <section id="p2Panel" class="hero-zone">
           <div class="hero-meta">
-            <div id="p2Name" class="hero-title-name">บ็อตเพื่อนยาก (AI Bot)</div>
-            <div id="p2DeckCount" class="hero-sub-status">21 ใบในสำรับ</div>
+            <div class="hero-meta-top">
+              <div id="p2Name" class="hero-title-name">บ็อตเพื่อนยาก (AI Bot)</div>
+              <div id="p2DeckCount" class="hero-sub-status">🃏 มือ 4 • 📚 สำรับ 17</div>
+            </div>
+            <div class="hero-hp-track" title="พลังชีวิตฝ่ายตรงข้าม">
+              <div id="p2HpFill" class="hero-hp-fill" style="width: 100%;"></div>
+              <span id="p2HpBarLabel" class="hero-hp-label">❤️ 30 / 30 HP</span>
+            </div>
+            <div id="p2StatusBadges" class="hero-status-badges"></div>
           </div>
 
           <div class="hero-frame-wrap" id="p2HeroWrap" role="button" tabindex="0" aria-label="ฮีโร่ฝ่ายตรงข้าม">
@@ -105,7 +112,7 @@
 
           <!-- Opponent Mana Crystals -->
           <div class="mana-tray">
-            <div class="mana-counter-label">
+            <div class="mana-counter-label" title="มานาของฝ่ายตรงข้าม">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="#38bdf8"><path d="M12 2l8 8-8 12L4 10l8-8z"/></svg>
               <span id="p2EnergyText">2/2</span>
             </div>
@@ -118,8 +125,9 @@
           
           <!-- Left: Graveyard Slot -->
           <div class="tabletop-slot">
-            <div class="slot-card-holder" id="graveyardSlot">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(212, 160, 23, 0.4)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <div class="slot-card-holder" id="graveyardSlot" title="การ์ดที่พ่ายแพ้หรือถูกทิ้งลงสุสาน">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="rgba(212, 160, 23, 0.55)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              <div id="graveyardCount" class="slot-count-badge">0</div>
             </div>
             <span class="slot-label">สุสาน (Grave)</span>
           </div>
@@ -147,9 +155,9 @@
 
           <!-- Right: 3D Draw Deck Stack -->
           <div class="tabletop-slot">
-            <div class="deck-stack-3d" id="drawDeckStack" title="กองการ์ดสำรับ">
+            <div class="deck-stack-3d" id="drawDeckStack" title="กองการ์ดสำรับของคุณ">
               <div class="deck-inner-seal">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
                 <div id="p1DeckCount" class="deck-count-num">21</div>
               </div>
             </div>
@@ -161,8 +169,15 @@
         <!-- Player Hero Bar & Fanned Hand (Bottom) -->
         <section id="p1Panel" class="hero-zone">
           <div class="hero-meta">
-            <div id="p1Name" class="hero-title-name">ผู้เล่น 1 (Player 1)</div>
-            <div class="hero-sub-status">กำลังพร้อมลุย</div>
+            <div class="hero-meta-top">
+              <div id="p1Name" class="hero-title-name">ผู้เล่น 1 (Player 1)</div>
+              <div id="p1SubStatus" class="hero-sub-status">🃏 มือ 4/7 • 📚 สำรับ 17</div>
+            </div>
+            <div class="hero-hp-track" title="พลังชีวิตของคุณ">
+              <div id="p1HpFill" class="hero-hp-fill" style="width: 100%;"></div>
+              <span id="p1HpBarLabel" class="hero-hp-label">❤️ 30 / 30 HP</span>
+            </div>
+            <div id="p1StatusBadges" class="hero-status-badges"></div>
           </div>
 
           <div class="hero-frame-wrap active-turn" id="p1HeroWrap" role="button" tabindex="0" aria-label="ฮีโร่ของคุณ">
@@ -177,7 +192,7 @@
 
           <!-- Player Mana Tray -->
           <div class="mana-tray">
-            <div class="mana-counter-label">
+            <div class="mana-counter-label" title="มานาที่ใช้ร่ายการ์ดในเทิร์นนี้">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="#38bdf8"><path d="M12 2l8 8-8 12L4 10l8-8z"/></svg>
               <span id="p1EnergyText">2/2</span>
             </div>
